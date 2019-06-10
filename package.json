@@ -1,0 +1,26 @@
+{
+  "name": "smf-parser",
+  "version": "0.1.0",
+  "description": "A MIDI event parser for Standard MIDI File (SMF)",
+  "main": "index.js",
+  "module": "main.js",
+  "scripts": {
+    "lint": "eslint *.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/shingo45endo/smf-parser.git"
+  },
+  "author": "shingo45endo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shingo45endo/smf-parser/issues"
+  },
+  "homepage": "https://github.com/shingo45endo/smf-parser#readme",
+  "dependencies": {
+    "esm": "^3.2.25"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0"
+  }
+}
