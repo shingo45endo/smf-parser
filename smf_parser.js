@@ -135,18 +135,18 @@ export function parseSmfToSeq(buf) {
 	}
 
 	return seq;
+}
 
-	function varNum(bytes, index) {
-		let value = 0;
-		let len = 0;
-		let byte = 0;
+export function varNum(bytes, index) {
+	let value = 0;
+	let len = 0;
+	let byte = 0;
 
-		do {
-			byte = bytes[index + len];
-			value = (value << 7) | (byte & 0x7f);
-			len++;
-		} while ((byte & 0x80) !== 0);
+	do {
+		byte = bytes[index + len];
+		value = (value << 7) | (byte & 0x7f);
+		len++;
+	} while ((byte & 0x80) !== 0);
 
-		return [value, len];
-	}
+	return [value, len];
 }
