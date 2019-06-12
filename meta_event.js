@@ -4,7 +4,7 @@ const parsers = {
 	0x00: {
 		name: 'Sequence Number',
 		handler: (payload) => {
-			console.assert(payload && payload.length);
+			console.assert(payload && 'length' in payload);
 			if (payload.length !== 2) {
 				return null;
 			}
@@ -44,7 +44,7 @@ const parsers = {
 	0x20: {
 		name: 'MIDI Channel Prefix',
 		handler: (payload) => {
-			console.assert(payload && payload.length);
+			console.assert(payload && 'length' in payload);
 			if (payload.length !== 1) {
 				return null;
 			}
@@ -56,7 +56,7 @@ const parsers = {
 	0x21: {
 		name: '(MIDI Port Prefix)',
 		handler: (payload) => {
-			console.assert(payload && payload.length);
+			console.assert(payload && 'length' in payload);
 			if (payload.length !== 1) {
 				return null;
 			}
@@ -72,7 +72,7 @@ const parsers = {
 	0x51: {
 		name: 'Set Tempo',
 		handler: (payload) => {
-			console.assert(payload && payload.length);
+			console.assert(payload && 'length' in payload);
 			if (payload.length !== 3) {
 				return null;
 			}
@@ -86,7 +86,7 @@ const parsers = {
 	0x52: {
 		name: 'SMPTE Offset',
 		handler: (payload) => {
-			console.assert(payload && payload.length);
+			console.assert(payload && 'length' in payload);
 			if (payload.length !== 5) {
 				return null;
 			}
@@ -102,7 +102,7 @@ const parsers = {
 	0x58: {
 		name: 'Time Signature',
 		handler: (payload) => {
-			console.assert(payload && payload.length);
+			console.assert(payload && 'length' in payload);
 			if (payload.length !== 4) {
 				return null;
 			}
@@ -117,7 +117,7 @@ const parsers = {
 	0x59: {
 		name: 'Key Signature',
 		handler: (payload) => {
-			console.assert(payload && payload.length);
+			console.assert(payload && 'length' in payload);
 			if (payload.length !== 2) {
 				return null;
 			}
@@ -130,6 +130,7 @@ const parsers = {
 	0x7f: {
 		name: 'Sequencer-Specific Meta-Event',
 		handler: (payload) => {
+			console.assert(payload && 'length' in payload);
 			// TODO: Implement Sequencer-Specific Meta-Event parser.
 			return {};
 		},
