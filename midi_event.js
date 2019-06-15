@@ -1,3 +1,5 @@
+import {analyzeSysEx} from './sysex.js';
+
 const channelMessageNames = {
 	0x8: 'Note Off',
 	0x9: 'Note On',
@@ -114,11 +116,7 @@ export function analyzeMidiMessage(bytes) {
 
 	let mes;
 	if (bytes[0] === 0xf0) {	// For SysEx
-		// TODO: Implement SysEx parser.
-		mes = {
-			kind: 'f0',
-			payload: bytes,
-		};
+		mes = {kind: 'f0', bytes, ...analyzeSysEx(bytes)};
 	} else if ((bytes[0] & 0xf0) !== 0xf0) {	// For Channel Messages
 		mes = analyzeChannelMessage(bytes);
 	} else {	// For System Common Message and System Real-time Message

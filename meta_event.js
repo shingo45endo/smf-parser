@@ -176,8 +176,8 @@ export function analyzeMetaEvent(bytes) {
 	const parser = parsers[eventId];
 
 	const mes = {
-		eventId, payload,
 		kind: 'ff',
+		eventId, payload,
 		eventName: (parser) ? parsers[eventId].name : 'Unknown Event',
 	};
 

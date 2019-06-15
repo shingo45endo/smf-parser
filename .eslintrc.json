@@ -19,6 +19,7 @@
 		"quotes": ["error", "single", {"avoidEscape": true, "allowTemplateLiterals": true}],
 		"semi": ["error", "always"],
 
+		"array-bracket-newline": ["error", "consistent"],
 		"block-spacing": ["error", "never"],
 		"comma-dangle": ["error", "always-multiline"],
 		"key-spacing": ["error",
