@@ -47,7 +47,7 @@ export class SysEx {
 			deviceId = newDeviceId;
 		}
 
-		//
+		// Analyzes the SysEx.
 		const result = {mfrId, deviceId, hexStr: bytesToHex(bytes)/* , desc: 'Unknown SysEx' */};
 		const parser = this._findParser(bytes);
 		if (parser) {
@@ -72,7 +72,7 @@ export class SysEx {
 			// Adds a parser.
 			this._parsers.set(key, value);
 
-			//
+			// Registers parsers to the map with various length of keys.
 			const strs = key.split(' ');
 			for (let i = 0; i < strs.length; i++) {
 				const key = strs.slice(0, i + 1).join(' ');

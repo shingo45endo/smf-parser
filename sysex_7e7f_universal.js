@@ -261,7 +261,7 @@ const parsers = new Map([
 				commandName:    'General Information',
 				subCommandName: 'Identity Reply',
 				mfrId, deviceId, subId1, subId2,
-				makerId: mm,
+				makerId:          mm,
 				familyCode:       makeValueFrom7bits(ff0, ff1),
 				familyMemberCode: makeValueFrom7bits(dd0, dd1),
 				versionInfo:      [ss0, ss1, ss2, ss3],
@@ -522,7 +522,7 @@ const parsers = new Map([
 			};
 
 			return {
-				commandName: 'Downloadable Sounds',
+				commandName:    'Downloadable Sounds',
 				subCommandName: subCommandNames[subId2],
 				mfrId, deviceId, subId1, subId2,
 			};
@@ -552,7 +552,7 @@ const parsers = new Map([
 			};
 
 			return {
-				commandName: 'File Reference Message',
+				commandName:    'File Reference Message',
 				subCommandName: subCommandNames[subId2],
 				mfrId, deviceId, subId1, subId2, data,
 				context: [ctx0, ctx1],
@@ -632,7 +632,7 @@ const parsers = new Map([
 			const [mfrId, deviceId, subId1, subId2, commandFormat, command, ...data] = stripEnclosure(bytes);
 			console.assert(mfrId === 0x7f && subId1 === 0x02);
 
-			// Note: Multibyte command format and command for extensions are not supported.
+			// Note: Multi-byte command format and command for extensions are not supported.
 			return {
 				commandName: 'MIDI Show Control',
 				mfrId, deviceId, subId1, subId2, commandFormat, command, data,
@@ -780,7 +780,7 @@ const parsers = new Map([
 			};
 
 			return {
-				commandName: 'Real Time MTC Cueing',
+				commandName:   'Real Time MTC Cueing',
 				subCommandName: subCommandNames[subId2],
 				mfrId, deviceId, subId1, subId2, addInfo,
 				eventNo: makeValueFrom7bits(sl, sm),
@@ -795,7 +795,7 @@ const parsers = new Map([
 			const [mfrId, deviceId, subId1, subId2, command, ...payload] = stripEnclosure(bytes);
 			console.assert(mfrId === 0x7f && subId1 === 0x06);
 
-			// Note: Multibyte command for extensions is not supported.
+			// Note: Multi-byte command for extensions is not supported.
 			return {
 				commandName: 'MIDI Machine Control Commands',
 				mfrId, deviceId, subId1, subId2, command, payload,
@@ -810,7 +810,7 @@ const parsers = new Map([
 			const [mfrId, deviceId, subId1, subId2, command, ...payload] = stripEnclosure(bytes);
 			console.assert(mfrId === 0x7f && subId1 === 0x07);
 
-			// Note: Multibyte response for extensions is not supported.
+			// Note: Multi-byte response for extensions is not supported.
 			return {
 				commandName: 'MIDI Machine Control Responses',
 				mfrId, deviceId, subId1, subId2, command, payload,
@@ -990,7 +990,7 @@ function handleTimeSignature(bytes) {
 	}
 
 	return {
-		commandName: 'Time Signature',
+		commandName:    'Time Signature',
 		subCommandName: (subId2 === 0x02) ? 'Immediate' : 'Delayed',
 		mfrId, deviceId, subId1, subId2,
 		numerator:                nn,
