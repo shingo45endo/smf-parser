@@ -83,7 +83,7 @@ const parsers = {
 			};
 		},
 	},
-	0x52: {
+	0x54: {
 		name: 'SMPTE Offset',
 		handler: (payload) => {
 			console.assert(payload && 'length' in payload);
