@@ -134,6 +134,10 @@ export function checkSumError(bytes) {
 	return bytes.reduce((p, c) => p + c) % 0x80 === 0;
 }
 
+export function makeValueFrom7bits(...bytes) {
+	return bytes.slice(0, 4).reduce((p, c, i) => p | ((c & 0x7f) << (i * 7)));
+}
+
 const sysEx = new SysEx();
 
 export function analyzeSysEx(bytes) {
