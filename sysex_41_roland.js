@@ -1845,13 +1845,12 @@ function makeParsers(modelId, modelProps) {
 					let index = 0;
 					const [mfrId, deviceId] = stripEnclosure(bytes);
 					console.assert(mfrId === 0x41);
-					index += 3;
-
-					index += modelIdLen;
-					const isCheckSumError = checkSumError(bytes.slice(index, -1));
+					index += 3 + modelIdLen;
 
 					const commandId = bytes[index];
 					index++;
+
+					const isCheckSumError = checkSumError(bytes.slice(index, -1));
 
 					const address = bytes.slice(index, index + addrLen);
 					console.assert(address.length === addrLen);
@@ -1877,13 +1876,12 @@ function makeParsers(modelId, modelProps) {
 					let index = 0;
 					const [mfrId, deviceId] = stripEnclosure(bytes);
 					console.assert(mfrId === 0x41);
-					index += 3;
-
-					index += modelIdLen;
-					const isCheckSumError = checkSumError(bytes.slice(index, -1));
+					index += 3 + modelIdLen;
 
 					const commandId = bytes[index];
 					index++;
+
+					const isCheckSumError = checkSumError(bytes.slice(index, -1));
 
 					const address = bytes.slice(index, index + addrLen);
 					console.assert(address.length === addrLen);

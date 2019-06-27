@@ -131,7 +131,7 @@ export function stripEnclosure(bytes) {
 
 export function checkSumError(bytes) {
 	console.assert(bytes && bytes.length, 'Invalid argument', {bytes});
-	return bytes.reduce((p, c) => p + c) % 0x80 === 0;
+	return bytes.reduce((p, c) => p + c) % 0x80 !== 0;
 }
 
 export function makeValueFrom7bits(...bytes) {
