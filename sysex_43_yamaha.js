@@ -77,13 +77,13 @@ function makeParsersXG(modelId, modelProps) {
 			handler = ((modelName, commandName) => (bytes) => {
 				const [mfrId, deviceId, modelId, byteCountM, byteCountL, addrH, addrM, addrL, ...payload] = stripEnclosure(bytes);
 				console.assert(mfrId === 0x43 && (deviceId & 0xf0) === command && payload && payload.length > 0);
-				const size = makeValueFrom7bits(byteCountL, byteCountM);
+				const byteCount = makeValueFrom7bits(byteCountL, byteCountM);
 				const address = [addrH, addrM, addrL];
 
 				const checkSum = payload.pop();
 				const isCheckSumError = checkSumError(bytes.slice(4, -1));
 
-				return {mfrId, deviceId, modelId, modelName, address, size, payload, checkSum, isCheckSumError, commandName};
+				return {mfrId, deviceId, modelId, modelName, address, byteCount, payload, checkSum, isCheckSumError, commandName};
 			})(modelProps.name, commandNames[command]);
 			break;
 
@@ -155,11 +155,11 @@ function makeParsersGM(modelId, modelProps) {
 			handler = ((modelName, commandName) => (bytes) => {
 				const [mfrId, deviceId, modelId, byteCountH, byteCountM, byteCountL, addrH, addrM, addrL, checkSum] = stripEnclosure(bytes);
 				console.assert(mfrId === 0x43 && (deviceId & 0xf0) === command);
-				const size = makeValueFrom7bits(byteCountL, byteCountM, byteCountH);
+				const byteCount = makeValueFrom7bits(byteCountL, byteCountM, byteCountH);
 				const address = [addrH, addrM, addrL];
 				const isCheckSumError = checkSumError(bytes.slice(4, -1));
 
-				return {mfrId, deviceId, modelId, modelName, address, size, checkSum, isCheckSumError, commandName};
+				return {mfrId, deviceId, modelId, modelName, address, byteCount, checkSum, isCheckSumError, commandName};
 			})(modelProps.name, commandNames[command]);
 			break;
 
