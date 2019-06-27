@@ -41,6 +41,21 @@ const modelPropsXG = new Map([
 	}],
 ]);
 
+const modelPropsGM = new Map([
+	[0x27, {
+		name: 'TG100',
+		commands: [0x10],
+	}],
+	[0x2b, {
+		name: 'TG300',
+		commands: [0x10, 0x30],
+	}],
+	[0x44, {
+		name: 'MU5',
+		commands: [0x10, 0x30],
+	}],
+]);
+
 function makeParsersXG(modelId, modelProps) {
 	console.assert(modelProps);
 
@@ -107,8 +122,65 @@ function makeParsersXG(modelId, modelProps) {
 	return parsers;
 }
 
+function makeParsersGM(modelId, modelProps) {
+	console.assert(modelProps);
+
+	const commandNames = {
+		0x10: 'Parameter Change',
+		0x30: 'Bulk Dump Request',
+	};
+
+	const parsers = new Map();
+	for (const command of modelProps.commands) {
+		const str = `f0 43 ${bytesToHex([command])[0]}. ${bytesToHex([modelId])}`;
+
+		let regexp, handler;
+		switch (command) {
+		case 0x10: // Parameter Change
+			regexp = new RegExp(String.raw`^${str} .. .. .. (?:.. )+.. f7$`, 'u');
+			handler = ((modelName, commandName) => (bytes) => {
+				const [mfrId, deviceId, modelId, addrH, addrM, addrL, ...payload] = stripEnclosure(bytes);
+				console.assert(mfrId === 0x43 && (deviceId & 0xf0) === command && payload && payload.length > 0);
+				const address = [addrH, addrM, addrL];
+
+				const checkSum = payload.pop();
+				const isCheckSumError = checkSumError([...bytes.slice(4, -1)]);
+
+				return {mfrId, deviceId, modelId, modelName, address, payload, checkSum, isCheckSumError, commandName};
+			})(modelProps.name, commandNames[command]);
+			break;
+
+		case 0x30: // Bulk Dump Request
+			regexp = new RegExp(String.raw`^${str} .. .. .. .. .. .. .. f7$`, 'u');
+			handler = ((modelName, commandName) => (bytes) => {
+				const [mfrId, deviceId, modelId, byteCountH, byteCountM, byteCountL, addrH, addrM, addrL, checkSum] = stripEnclosure(bytes);
+				console.assert(mfrId === 0x43 && (deviceId & 0xf0) === command);
+				const size = makeValueFrom7bits(byteCountL, byteCountM, byteCountH);
+				const address = [addrH, addrM, addrL];
+				const isCheckSumError = checkSumError(bytes.slice(4, -1));
+
+				return {mfrId, deviceId, modelId, modelName, address, size, checkSum, isCheckSumError, commandName};
+			})(modelProps.name, commandNames[command]);
+			break;
+
+		default:
+			console.assert(false, 'Unexpected case', {command});
+			break;
+		}
+
+		const key = str.replace('.', '0');
+		parsers.set(key, {regexp, handler});
+	}
+
+	return parsers;
+}
+
 // Add SysEx parsers.
 for (const model of modelPropsXG) {
 	const parsers = makeParsersXG(...model);
+	addSysExParsers(parsers);
+}
+for (const model of modelPropsGM) {
+	const parsers = makeParsersGM(...model);
 	addSysExParsers(parsers);
 }
