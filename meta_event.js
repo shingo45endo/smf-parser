@@ -1,4 +1,5 @@
 import {varNum} from './smf_parser.js';
+import {analyzeSequencerEvent} from './sequencer_event.js';
 
 const parsers = {
 	0x00: {
@@ -131,8 +132,7 @@ const parsers = {
 		name: 'Sequencer-Specific Meta-Event',
 		handler: (payload) => {
 			console.assert(payload && 'length' in payload);
-			// TODO: Implement Sequencer-Specific Meta-Event parser.
-			return {};
+			return analyzeSequencerEvent(payload);
 		},
 	},
 };
