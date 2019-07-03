@@ -312,8 +312,7 @@ function makeHandlerForPackedData(modelName, commandName, isAdditionalBank) {
 			obj.bankNo = payload.shift();
 		}
 
-		const data = convert7to8(payload);
-		obj.data = data;
+		obj.decodedPayload = convert7to8(payload);
 
 		return obj;
 	})(modelName, commandName, isAdditionalBank);
