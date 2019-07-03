@@ -1,4 +1,4 @@
-import {addSysExParsers, stripEnclosure} from './sysex_instance.js';
+import {addSysExParsers, bytesToHex, stripEnclosure} from './sysex_instance.js';
 
 const modelNames = {
 	0x08: 'GMega/K11',
@@ -288,8 +288,201 @@ const parsersGMega = new Map([
 	}],
 ]);
 
+const parsersGMegaLX = new Map([
+	// A-1: System Functions
+	['f0 40 00 10 00 09 00', {
+		regexp: /^f0 40 0. 10 00 09 00 .. 00 0. 0. f7$/u,
+		handler: (bytes) => {
+			const [mfrId, deviceId, functionId, groupId, modelId, commandId, indexNo, tmp00, dh, dl] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x40 && functionId === 0x10 && groupId === 0x00 && modelId === 0x09 && commandId === 0x00 && tmp00 === 0x00);
+
+			return {
+				commandName: 'System Functions',
+				mfrId, deviceId, functionId, groupId, modelId, commandId, indexNo,
+				modelName: modelNames[modelId],
+				value: makeValueFromNibbles(dl, dh),
+			};
+		},
+	}],
+	// D-4: All Data Request
+	['f0 40 00 00 00 09', {
+		regexp: /^f0 40 0. 00 00 09 f7$/u,
+		handler: (bytes) => {
+			const [mfrId, deviceId, functionId, groupId, modelId] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x40 && functionId === 0x00 && groupId === 0x00 && modelId === 0x09);
+
+			return {
+				commandName: 'All Data Request',
+				mfrId, deviceId, functionId, groupId, modelId,
+				modelName: modelNames[modelId],
+			};
+		},
+	}],
+	// E-1: Write Error
+	['f0 40 00 41', {
+		regexp: /^f0 40 0. 41 f7$/u,
+		handler: (bytes) => {
+			const [mfrId, deviceId, functionId] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x40 && functionId === 0x41);
+
+			return {
+				commandName: 'Write Error',
+				mfrId, deviceId, functionId,
+				modelName: modelNames[0x09],
+			};
+		},
+	}],
+	// F-1: Machine ID Request
+	['f0 40 00 60', {
+		regexp: /^f0 40 0. 60 f7$/u,
+		handler: (bytes) => {
+			const [mfrId, deviceId, functionId] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x40 && functionId === 0x60);
+
+			return {
+				commandName: 'Machine ID Request',
+				mfrId, deviceId, functionId,
+				modelName: modelNames[0x09],
+			};
+		},
+	}],
+	// G-1: Machine ID Acknowledge
+	['f0 40 00 61', {
+		regexp: /^f0 40 0. 61 .. .. f7$/u,
+		handler: (bytes) => {
+			const [mfrId, deviceId, functionId, groupId, modelId] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x40 && functionId === 0x61);
+
+			return {
+				commandName: 'Machine ID Acknowledge',
+				mfrId, deviceId, functionId, groupId, modelId,
+				modelName: modelNames[modelId] || 'Unknown',
+			};
+		},
+	}],
+]);
+// A-2: Performance Mode Section Functions (supported by only KC20)
+// A-3: Performance Mode Settings Functions (supported by only KC20)
+// A-4: Compose Mode Section Functions
+// A-5: Compose Mode Settings Functions
+for (let i = 0x01; i <= 0x04; i++) {
+	const commandName = {
+		0x01: 'Performance Mode Section Functions',		// supported by only KC20
+		0x02: 'Performance Mode Settings Functions',	// supported by only KC20
+		0x03: 'Compose Mode Section Functions',
+		0x04: 'Compose Mode Settings Functions',
+	}[i];
+	console.assert(commandName);
+	const commandStr = bytesToHex([i]);
+
+	const regexp = new RegExp(String.raw`^f0 40 0. 10 00 09 ${commandStr} .. .. 0. 0. f7$`, 'u');
+	const handler = ((modelName, commandName) => (bytes) => {
+		const [mfrId, deviceId, functionId, groupId, modelId, commandId, indexNo, partNo, dh, dl] = stripEnclosure(bytes);
+		console.assert(mfrId === 0x40 && functionId === 0x10 && groupId === 0x00 && modelId === 0x09);
+
+		return {
+			mfrId, deviceId, functionId, groupId, modelId, modelName, commandId, commandName, indexNo, partNo,
+			value: makeValueFromNibbles(dl, dh),
+		};
+
+	})(modelNames[0x09], commandName);
+
+	const key = `f0 40 00 10 00 09 ${commandStr}`;
+	parsersGMegaLX.set(key, {regexp, handler});
+}
+// B-1: Dump System Functions
+// B-2: Dump Performance Mode Section Functions (supported by only KC20)
+// B-3: Dump Performance Mode Settings Functions (supported by only KC20)
+// B-4: Dump Compose Mode Section Functions
+// B-5: Dump Compose Mode Settings Functions
+for (let i = 0x00; i <= 0x04; i++) {
+	const commandName = {
+		0x00: 'Dump System Functions',
+		0x01: 'Dump Performance Mode Section Functions',	// supported by only KC20
+		0x02: 'Dump Performance Mode Settings Functions',	// supported by only KC20
+		0x03: 'Dump Compose Mode Section Functions',
+		0x04: 'Dump Compose Mode Settings Functions',
+	}[i];
+	console.assert(commandName);
+	const commandStr = bytesToHex([i]);
+
+	const regexp = new RegExp(String.raw`^f0 40 0. 20 00 09 ${commandStr} (?:0. 0. )+f7$`, 'u');
+	const handler = ((modelName, commandName) => (bytes) => {
+		const [mfrId, deviceId, functionId, groupId, modelId, commandId, ...payload] = stripEnclosure(bytes);
+		console.assert(mfrId === 0x40 && functionId === 0x20 && groupId === 0x00 && modelId === 0x09);
+		const decodedPayload = makeArrayFromNibbles(payload);
+
+		return {
+			mfrId, deviceId, functionId, groupId, modelId, modelName, commandId, commandName, decodedPayload,
+		};
+
+	})(modelNames[0x09], commandName);
+
+	const key = `f0 40 00 20 00 09 ${commandStr}`;
+	parsersGMegaLX.set(key, {regexp, handler});
+}
+// D-1: System Functions Data Request
+// D-2: Performance Mode Data Request
+// D-3: Compose Mode Data Request
+for (let i = 0x00; i <= 0x02; i++) {
+	const commandName = {
+		0x00: 'System Functions Data Request',
+		0x01: 'Performance Mode Data Request',	// supported by only KC20
+		0x02: 'Compose Mode Data Request',
+	}[i];
+	console.assert(commandName);
+	const commandStr = bytesToHex([i]);
+
+	const regexp = new RegExp(String.raw`^f0 40 0. 00 00 09 ${commandStr} f7$`, 'u');
+	const handler = ((modelName, commandName) => (bytes) => {
+		const [mfrId, deviceId, functionId, groupId, modelId, commandId] = stripEnclosure(bytes);
+		console.assert(mfrId === 0x40 && functionId === 0x00 && groupId === 0x00 && modelId === 0x09);
+
+		return {
+			mfrId, deviceId, functionId, groupId, modelId, modelName, commandId, commandName,
+		};
+
+	})(modelNames[0x09], commandName);
+
+	const key = `f0 40 00 00 00 09 ${commandStr}`;
+	parsersGMegaLX.set(key, {regexp, handler});
+}
+
+const parsersGMouse = new Map([
+	// A-1: System Functions
+	['f0 40 00 10 00 0a 00', {
+		regexp: /^f0 40 0. 10 00 0a 00 .. 00 0. 0. f7$/u,
+		handler: (bytes) => {
+			const [mfrId, deviceId, functionId, groupId, modelId, commandId, indexNo, tmp00, dh, dl] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x40 && functionId === 0x10 && groupId === 0x00 && modelId === 0x0a && commandId === 0x00 && tmp00 === 0x00);
+
+			return {
+				commandName: 'System Functions',
+				mfrId, deviceId, functionId, groupId, modelId, commandId, indexNo,
+				modelName: modelNames[modelId],
+				value: makeValueFromNibbles(dl, dh),
+			};
+		},
+	}],
+	// A-2: Setting Functions
+	['f0 40 00 10 00 0a 04', {
+		regexp: /^f0 40 0. 10 00 0a 04 .. .. 0. 0. f7$/u,
+		handler: (bytes) => {
+			const [mfrId, deviceId, functionId, groupId, modelId, commandId, indexNo, partNo, dh, dl] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x40 && functionId === 0x10 && groupId === 0x00 && modelId === 0x0a && commandId === 0x04);
+
+			return {
+				commandName: 'Setting Functions',
+				mfrId, deviceId, functionId, groupId, modelId, commandId, indexNo, partNo,
+				modelName: modelNames[modelId],
+				value: makeValueFromNibbles(dl, dh),
+			};
+		},
+	}],
+]);
+
 function makeValueFromNibbles(l, h) {
-	return (h & 0x0f) << 4 | (l & 0x0f);
+	return ((h & 0x0f) << 4) | (l & 0x0f);
 }
 
 function makeArrayFromNibbles(nibbles) {
@@ -303,3 +496,5 @@ function makeArrayFromNibbles(nibbles) {
 
 // Add SysEx parsers.
 addSysExParsers(parsersGMega);
+addSysExParsers(parsersGMegaLX);
+addSysExParsers(parsersGMouse);
