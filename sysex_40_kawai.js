@@ -31,7 +31,7 @@ const parsersGMega = new Map([
 
 			return {
 				commandName: 'Section Functions',
-				mfrId, deviceId, commandId, groupId, modelId, functionId, indexNo, partNo,
+				mfrId, deviceId, functionId, groupId, modelId, commandId, indexNo, partNo,
 				modelName: modelNames[modelId],
 				value: makeValueFromNibbles(dl, dh),
 			};
@@ -46,7 +46,7 @@ const parsersGMega = new Map([
 
 			return {
 				commandName: 'Single Functions',
-				mfrId, deviceId, commandId, groupId, modelId, functionId, indexNo, progNo,
+				mfrId, deviceId, functionId, groupId, modelId, commandId, indexNo, progNo,
 				modelName: modelNames[modelId],
 				values: [makeValueFromNibbles(dl1, dh1), makeValueFromNibbles(dl2, dh2)],
 			};
@@ -61,7 +61,7 @@ const parsersGMega = new Map([
 
 			return {
 				commandName: 'Section Functions',
-				mfrId, deviceId, commandId, groupId, modelId, functionId, indexNo, noteNo,
+				mfrId, deviceId, functionId, groupId, modelId, commandId, indexNo, noteNo,
 				modelName: modelNames[modelId],
 				value: makeValueFromNibbles(dl, dh),
 			};
