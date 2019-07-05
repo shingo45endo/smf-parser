@@ -166,18 +166,64 @@ const parsers = [
 		},
 	},
 
-	// YAMAHA: Score Start Bar
+	// YAMAHA: Start Bar
+	{
+		regexp: /^43 73 0a 00 04 ..+$/u,
+		handler: (bytes) => {
+			console.assert(bytes && bytes.length === 6);
+			const [mfrId, formatId, eventId, tmp00, commandId, startBar] = bytes;
+			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0a && tmp00 === 0x00 && commandId === 0x04);
+
+			return {
+				commandName:    'YAMAHA Meta Event',
+				subCommandName: 'Start Bar',
+				mfrId, formatId, eventId, commandId, startBar,
+			};
+		},
+	},
+	// YAMAHA: Track Information
+	{
+		regexp: /^43 73 0a 00 05(?: ..){16}$/u,
+		handler: (bytes) => {
+			console.assert(bytes && bytes.length === 21);
+			const [mfrId, formatId, eventId, tmp00, commandId, ...rest] = bytes;
+			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0a && tmp00 === 0x00 && commandId === 0x05);
+			const trackStrs = rest.map((e) => String.fromCharCode(e));
+
+			return {
+				commandName:    'YAMAHA Meta Event',
+				subCommandName: 'Track Information',
+				mfrId, formatId, eventId, commandId, trackStrs,
+			};
+		},
+	},
+	// YAMAHA: Offset Volume
+	{
+		regexp: /^43 73 0a 00 06(?: ..){16}$/u,
+		handler: (bytes) => {
+			console.assert(bytes && bytes.length === 21);
+			const [mfrId, formatId, eventId, tmp00, commandId, ...offsetVolumes] = bytes;
+			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0a && tmp00 === 0x00 && commandId === 0x06);
+
+			return {
+				commandName:    'YAMAHA Meta Event',
+				subCommandName: 'Offset Volume',
+				mfrId, formatId, eventId, commandId, offsetVolumes,
+			};
+		},
+	},
+	// YAMAHA: Score Offset Measure
 	{
 		regexp: /^43 73 0a 00 07 ..+$/u,
 		handler: (bytes) => {
 			console.assert(bytes && bytes.length === 6);
-			const [mfrId, formatId, eventId, tmp00, tmp07, scoreStartBar] = bytes;
-			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0a && tmp00 === 0x00 && tmp07 === 0x07);
+			const [mfrId, formatId, eventId, tmp00, commandId, startBar] = bytes;
+			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0a && tmp00 === 0x00 && commandId === 0x07);
 
 			return {
 				commandName:    'YAMAHA Meta Event',
-				subCommandName: 'Score Start Bar',
-				mfrId, formatId, eventId, scoreStartBar,
+				subCommandName: 'Score Offset Measure',
+				mfrId, formatId, eventId, commandId, startBar,
 			};
 		},
 	},
