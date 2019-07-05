@@ -181,6 +181,37 @@ const parsers = [
 			};
 		},
 	},
+	// YAMAHA: Style Name
+	{
+		regexp: /^43 73 0c 00(?: ..)+$/u,
+		handler: (bytes) => {
+			console.assert(bytes && bytes.length >= 5);
+			const [mfrId, formatId, eventId, tmp00, ...rest] = bytes;
+			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0c && tmp00 === 0x00);
+			const styleName = String.fromCharCode(...rest);
+
+			return {
+				commandName:    'YAMAHA Meta Event',
+				subCommandName: 'Style Name',
+				mfrId, formatId, eventId, styleName,
+			};
+		},
+	},
+	// YAMAHA: Song OTS
+	{
+		regexp: /^43 73 0d 00(?: ..)+$/u,
+		handler: (bytes) => {
+			console.assert(bytes && bytes.length >= 5);
+			const [mfrId, formatId, eventId, tmp00, ...payload] = bytes;
+			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0d && tmp00 === 0x00);
+
+			return {
+				commandName:    'YAMAHA Meta Event',
+				subCommandName: 'Song OTS',
+				mfrId, formatId, eventId, payload,
+			};
+		},
+	},
 	// YAMAHA: Keyboard Voice
 	{
 		regexp: /^43 73 0d 01(?: ..)+$/u,
