@@ -5,3 +5,6 @@ import './sysex_41_roland.js';
 import './sysex_43_yamaha.js';
 import './sysex_42_korg.js';
 import './sysex_40_kawai.js';
+import './sysex_44_casio.js';
+import './sysex_47_akai.js';
+import './sysex_55_suzuki.js';
