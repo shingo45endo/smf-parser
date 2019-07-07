@@ -17,7 +17,7 @@ const parsers = new Map([
 	}],
 	// Bulk Dump Data Set
 	['f0 47 10 01 5d', {
-		regexp: /^f0 47 10 01 5d .. ..(?: ..){5}f7$/u,
+		regexp: /^f0 47 10 01 5d .. ..(?: ..){5} f7$/u,
 		handler: (bytes) => {
 			const [mfrId, deviceId, commandId, modelId, bankNo, progNo, ...payload] = stripEnclosure(bytes);
 			console.assert(mfrId === 0x44 && deviceId === 0x10 && commandId === 0x01 && modelId === 0x5d);
@@ -31,7 +31,7 @@ const parsers = new Map([
 	}],
 	// Data Set
 	['f0 47 10 42 5d', {
-		regexp: /^f0 47 10 42 5d(?: ..){3}(?: ..)+f7$/u,
+		regexp: /^f0 47 10 42 5d(?: ..){3}(?: ..)+ f7$/u,
 		handler: (bytes) => {
 			const [mfrId, deviceId, commandId, modelId, ...rest] = stripEnclosure(bytes);
 			console.assert(mfrId === 0x44 && deviceId === 0x10 && commandId === 0x42 && modelId === 0x5d);
