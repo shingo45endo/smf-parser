@@ -1,4 +1,4 @@
-import {addSysExParsers, bytesToHex, stripEnclosure, makeValueFrom7bits} from './sysex_instance.js';
+import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError, makeValueFrom7bits} from './sysex_instance.js';
 
 const modelProps = new Map([
 	// M1, M1R
@@ -44,6 +44,92 @@ const modelProps = new Map([
 		commands: [0x12, 0x10, 0x1c, 0x19, 0x1d, 0x06, 0x33, 0x0e, 0x0d, 0x0f, 0x11, 0x1a, 0x40, 0x4c, 0x49, 0x4d, 0x55, 0x68, 0x51, 0x52, 0x50, 0x4e, 0x41, 0x53, 0x42, 0x26, 0x23, 0x24, 0x21, 0x22],
 	}],
 ]);
+
+const commandNamesNS5R = {
+	0x00: 'Mode Change',
+	0x01: 'Map Change',
+	0x08: 'Parameter Change',
+	0x0e: 'Exclusive Dump Reply',
+	0x10: 'Mode Request',
+	0x11: 'Map Type Request',
+	0x12: 'Part Parameter Change',
+	0x20: 'Global Dump Request',
+	0x21: 'Current Program Dump Request',
+	0x22: 'Current Combination Dump Request',
+	0x23: 'Current Drum Kit Dump Request',
+	0x24: 'Current Effect Dump Request',
+	0x25: 'Current Multi Dump Request',
+	0x26: 'All Program Dump Request',
+	0x27: 'All Combination Dump Request',
+	0x28: 'All User Drum Kit Dump Request',
+	0x29: 'All Effect Dump Request',
+	0x2a: 'All Multi Part Dump Request',
+	0x2b: 'Part Common Params Dump Request',
+	0x2c: 'All Part Params Dump Request',
+	0x30: 'Global Dump',
+	0x31: 'Current Program Dump',
+	0x32: 'Current Combination Dump',
+	0x33: 'Current Drum Kit Dump',
+	0x34: 'Current Effect Dump',
+	0x35: 'Current Multi Dump',
+	0x36: 'All Program Dump',
+	0x37: 'All Combination Dump',
+	0x38: 'All User Drum Dump',
+	0x39: 'All Effect Dump',
+	0x3a: 'All Multi Dump',
+	0x3b: 'Part Common Parameter Dump',
+	0x3c: 'All Part Parameter Dump',
+	0x41: 'Program Write',
+	0x42: 'Combination Write',
+	0x43: 'Drum Write',
+	0x44: 'Effect Write',
+	0x45: 'Multi Write',
+	0x7d: 'LCD Back Light Color',
+	0x7e: 'Remote Switch',
+};
+
+const commandNamesN1R = {
+	0x00: 'Mode Change',
+	0x01: 'Map Change',
+	0x08: 'Parameter Change',
+	0x0e: 'Exclusive Dump Reply',
+	0x10: 'Mode Request',
+	0x11: 'Map Type Request',
+	0x12: 'Part Parameter Change',
+	0x1f: 'Capture LCD Image',
+	0x20: 'Global Dump Request',
+	0x21: 'Current Program Dump Request',
+	0x22: 'Current Combination Dump Request',
+	0x23: 'Current Drum Kit Dump Request',
+	0x24: 'Current Effect Dump Request',
+	0x25: 'Current Performance Dump Request',
+	0x26: 'All Program Dump Request',
+	0x27: 'All Combination Dump Request',
+	0x28: 'All User Drum Kit Dump Request',
+	0x29: 'All Effect Dump Request',
+	0x2a: 'All Performance Part Dump Request',
+	0x30: 'Global Dump',
+	0x31: 'Current Program Dump',
+	0x32: 'Current Combination Dump',
+	0x33: 'Current Drum Kit Dump',
+	0x34: 'Current Effect Dump',
+	0x35: 'Current Performance Dump',
+	0x36: 'All Program Dump',
+	0x37: 'All Combination Dump',
+	0x38: 'All User Drum Dump',
+	0x39: 'All Effect Dump',
+	0x3a: 'All Performance Dump',
+	0x3b: 'Voice Name Dump',
+	0x41: 'Program Write',
+	0x42: 'Combination Write',
+	0x43: 'Drum Write',
+	0x44: 'Program Effect Write',
+	0x45: 'Combination Effect Write',
+	0x46: 'Performance Write',
+	0x7d: 'LCD Back Light Color',
+	0x7e: 'Remote Switch',
+	0x7f: 'Capture LCD Data',
+};
 
 function makeParsers(modelId, modelProps) {
 	console.assert(modelProps);
@@ -289,6 +375,120 @@ function makeParsers(modelId, modelProps) {
 	return parsers;
 }
 
+function makeParsersN(modelId, commands) {
+	console.assert(commands);
+
+	const modelNamesN = {
+		0x42: 'NS5R',
+		0x4c: 'N1R',
+	};
+	
+	const modelIdStr = bytesToHex([modelId]);
+	const parsers = new Map();
+	for (const command of Object.keys(commands)) {
+		const commandId = parseInt(command, 10);
+		const commandStr = bytesToHex([commandId]);
+
+		let regexp, handler;
+		const regexpStr = `f0 42 3. ${modelIdStr} ${commandStr}`;
+		switch (commandId) {
+//		case 0x2b:	// Voice Name Dump Request	// TODO: Support 0x2b for N1R
+		case 0x00:	// Mode Change
+		case 0x01:	// Map Change
+		case 0x7d:	// LCD Back Light Color
+		case 0x7e:	// Remote Switch
+			regexp = new RegExp(String.raw`^${regexpStr} .. f7$`, 'u');
+			handler = ((modelName, commandName) => (bytes) => {
+				const [mfrId, deviceId, modelId, commandId, value] = stripEnclosure(bytes);
+				console.assert(mfrId === 0x42);
+
+				return {mfrId, deviceId, modelId, modelName, commandId, commandName, value};
+			})(modelNamesN[modelId], commands[command]);
+			break;
+
+		case 0x08:	// Parameter Change
+			regexp = new RegExp(String.raw`^${regexpStr} .. .. .. .. f7$`, 'u');
+			handler = ((modelName, commandName) => (bytes) => {
+				const [mfrId, deviceId, modelId, commandId, ll, mm, dd, ee] = stripEnclosure(bytes);
+				console.assert(mfrId === 0x42);
+
+				return {
+					mfrId, deviceId, modelId, modelName, commandId, commandName,
+					paramNo: makeValueFrom7bits(ll, mm),
+					value:   makeValueFrom7bits(dd, ee),
+				};
+			})(modelNamesN[modelId], commands[command]);
+			break;
+
+		case 0x0e:	// Exclusive Dump Reply
+			regexp = new RegExp(String.raw`^${regexpStr} .. .. f7$`, 'u');
+			handler = ((modelName, commandName) => (bytes) => {
+				const [mfrId, deviceId, modelId, commandId, value, commandNo] = stripEnclosure(bytes);
+				console.assert(mfrId === 0x42);
+
+				return {mfrId, deviceId, modelId, modelName, commandId, commandName, value, commandNo};
+			})(modelNamesN[modelId], commands[command]);
+			break;
+
+		case 0x12:	// Part Parameter Change
+			regexp = new RegExp(String.raw`^${regexpStr}(?: ..){3}(?: ..)+ f7$`, 'u');
+			handler = ((modelName, commandName) => (bytes) => {
+				const [mfrId, deviceId, modelId, commandId, ...rest] = stripEnclosure(bytes);
+				console.assert(mfrId === 0x42);
+				const address = rest.slice(0, 3);
+				const payload = rest.slice(3);
+
+				return {mfrId, deviceId, modelId, modelName, commandId, commandName, address, payload};
+			})(modelNamesN[modelId], commands[command]);
+			break;
+
+		default:
+			if (0x10 <= commandId && commandId <= 0x2f) {
+				// Dump Request
+				regexp = new RegExp(String.raw`^${regexpStr} f7$`, 'u');
+				handler = ((modelName, commandName) => (bytes) => {
+					const [mfrId, deviceId, modelId, commandId] = stripEnclosure(bytes);
+					console.assert(mfrId === 0x42);
+
+					return {mfrId, deviceId, modelId, modelName, commandId, commandName};
+				})(modelNamesN[modelId], commands[command]);
+
+			} else if ((commandId & 0xf0) === 0x30 || commandId === 0x7f) {
+				// Data Dump / Capture LCD Data
+				regexp = new RegExp(String.raw`^${regexpStr}(?: ..)+ f7$`, 'u');
+				handler = ((modelName, commandName) => (bytes) => {
+					const [mfrId, deviceId, modelId, commandId, ...payload] = stripEnclosure(bytes);
+					console.assert(mfrId === 0x42);
+					const isCheckSumError = checkSumError(payload);
+					const checkSum = payload.pop();
+					const decodedPayload = convert7to8(payload);
+
+					return {mfrId, deviceId, modelId, modelName, commandId, commandName, payload, decodedPayload, checkSum, isCheckSumError};
+				})(modelNamesN[modelId], commands[command]);
+
+			} else if ((commandId & 0xf0) === 0x40) {
+				// Write Request
+				regexp = new RegExp(String.raw`^${regexpStr} .. f7$`, 'u');
+				handler = ((modelName, commandName) => (bytes) => {
+					const [mfrId, deviceId, modelId, commandId, progNo] = stripEnclosure(bytes);
+					console.assert(mfrId === 0x42);
+
+					return {mfrId, deviceId, modelId, modelName, commandId, commandName, progNo};
+				})(modelNamesN[modelId], commands[command]);
+
+			} else {
+				console.assert(false);
+				break;
+			}
+		}
+
+		const key = `f0 42 30 ${modelIdStr} ${commandStr}`;
+		parsers.set(key, {regexp, handler});
+	}
+
+	return parsers;
+}
+
 function makeHandlerForNoData(modelName, commandName) {
 	return ((modelName, commandName) => (bytes) => {
 		const [mfrId, deviceId, modelId, commandId, bankNo] = stripEnclosure(bytes);
@@ -342,3 +542,5 @@ for (const model of modelProps) {
 	const parsers = makeParsers(...model);
 	addSysExParsers(parsers);
 }
+addSysExParsers(makeParsersN(0x42, commandNamesNS5R));
+addSysExParsers(makeParsersN(0x4c, commandNamesN1R));
