@@ -35,8 +35,8 @@ const parsers = new Map([
 		handler: (bytes) => {
 			const [mfrId, deviceId, commandId, modelId, ...rest] = stripEnclosure(bytes);
 			console.assert(mfrId === 0x44 && deviceId === 0x10 && commandId === 0x42 && modelId === 0x5d);
-			const address = rest.slice(0, 4);
-			const payload = rest.slice(4);
+			const address = rest.slice(0, 3);
+			const payload = rest.slice(3);
 
 			return {
 				commandName: 'Data Set',
