@@ -290,12 +290,18 @@ const parsers = [
 ];
 
 export function analyzeSequencerEvent(bytes) {
+	if (!bytes || !bytes.length) {
+		return null;
+	}
+
 	const hexStr = bytesToHex(bytes);
+	const result = {hexStr, commandName: 'Unknown'};
 	for (const parser of parsers) {
 		if (parser.regexp.test(hexStr)) {
-			return parser.handler(bytes);
+			Object.assign(result, parser.handler(bytes));
+			break;
 		}
 	}
 
-	return {commandName: 'Unknown'};
+	return result;
 }
