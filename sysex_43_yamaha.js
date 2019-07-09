@@ -56,6 +56,71 @@ const modelPropsGM = new Map([
 	}],
 ]);
 
+const parsersBulkDump = new Map([
+	// Bulk Dump
+	['f0 43 00 7a', {
+		regexp: /^f0 43 0. [07]a .. .. 4c 4d 20 20 .. .. .. .. .. .. 00 00 00 00 00 00 00 00 00 00 00 00 00 00 .. .. (?:.. )+f7$/u,
+		handler: (bytes) => {
+			const [mfrId, deviceId, commandId, byteCountM, byteCountL, ...rest] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x43 && (commandId & 0x0f) === 0x0a);
+
+			const byteCount = makeValueFrom7bits(byteCountL, byteCountM);
+			const formatName = String.fromCharCode(...rest.slice(0, 10));
+			const checkSum = rest.pop();
+			const isCheckSumError = checkSumError(bytes.slice(6, -1));
+
+			return {
+				commandName: 'Bulk Dump',
+				modelName:   'SY/TG',
+				mfrId, deviceId, commandId, byteCount, formatName, checkSum, isCheckSumError,
+				memoryType: bytes[30],
+				memoryNo:   bytes[31],
+				payload:    bytes.slice(32, -2),
+			};
+		},
+	}],
+	// Bulk Dump Request
+	['f0 43 20 7a', {
+		regexp: /^f0 43 [02]. [07]a 4c 4d 20 20 .. .. .. .. .. .. (?:(?:.. ){14})?f7$/u,
+		handler: (bytes) => {
+			console.assert(bytes.length === 14 || bytes.length === 30);
+			const [mfrId, deviceId, commandId, ...rest] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x43 && (commandId & 0x0f) === 0x0a);
+			const formatName = String.fromCharCode(...rest.slice(0, 10));
+
+			const obj = {
+				commandName: 'Bulk Dump Request',
+				modelName:   'SY/TG',
+				mfrId, deviceId, commandId, formatName,
+			};
+
+			if (bytes.length === 14) {
+				return obj;
+			} else {
+				if (bytes.slice(14, 28).every((e) => e === 0x00)) {
+					return {
+						...obj,
+						memoryType: bytes[28],
+						memoryNo:   bytes[29],
+					};
+				} else {
+					const [addrH, addrM, addrL, byteCountH, byteCountM, byteCountL] = rest;
+					const address = [addrH, addrM, addrL];
+					const byteCount = makeValueFrom7bits(byteCountL, byteCountM, byteCountH);
+					const checkSum = rest.pop();
+					const isCheckSumError = checkSumError(bytes.slice(6, -1));
+
+					return {
+						...obj,
+						modelName: 'TG100',
+						address, byteCount, checkSum, isCheckSumError,
+					};
+				}	
+			}
+		},
+	}],
+]);
+
 function makeParsersXG(modelId, modelProps) {
 	console.assert(modelProps);
 
@@ -184,3 +249,4 @@ for (const model of modelPropsGM) {
 	const parsers = makeParsersGM(...model);
 	addSysExParsers(parsers);
 }
+addSysExParsers(parsersBulkDump);
