@@ -61,25 +61,21 @@ const modelPropsParam = new Map([
 	[0x26, {
 		name: 'TG33',
 		paramLen: 7,
-		valueLen: 2,
 	}],
 	// SY85, TG500
 	[0x29, {
 		name: 'SY85',
 		paramLen: 4,
-		valueLen: 2,
 	}],
 	// SY77, TG77, SY99
 	[0x34, {
 		name: 'SY77',
 		paramLen: 4,
-		valueLen: 2,
 	}],
 	// TG55, SY55
 	[0x35, {
 		name: 'TG55',
 		paramLen: 4,
-		valueLen: 2,
 	}],
 ]);
 
@@ -273,18 +269,18 @@ function makeParsersParam(modelId, modelProps) {
 	const parsers = new Map();
 	const str = `f0 43 1. ${bytesToHex([modelId])}`;
 
-	const regexp = new RegExp(String.raw`^${str}(?: ..){${modelProps.paramLen}}(?: ..){${modelProps.valueLen}} f7$`, 'u');
-	const handler = ((modelName, paramLen, valueLen) => (bytes) => {
+	const regexp = new RegExp(String.raw`^${str}(?: ..){${modelProps.paramLen}}(?: ..){2} f7$`, 'u');
+	const handler = ((modelName, paramLen) => (bytes) => {
 		const [mfrId, deviceId, modelId, ...rest] = stripEnclosure(bytes);
-		console.assert(mfrId === 0x43 && (deviceId & 0xf0) === 0x10 && rest.length === paramLen + valueLen);
+		console.assert(mfrId === 0x43 && (deviceId & 0xf0) === 0x10 && rest.length === paramLen + 2);
 		const paramNos = rest.slice(0, paramLen);
-		const values   = rest.slice(paramLen);
+		const value    = makeValueFrom7bits(rest[paramLen + 1], rest[paramLen]);
 
 		return {
 			commandName: 'Parameter Change',
-			mfrId, deviceId, modelId, modelName, paramNos, values,
+			mfrId, deviceId, modelId, modelName, paramNos, value,
 		};
-	})(modelProps.name, modelProps.paramLen, modelProps.valueLen);
+	})(modelProps.name, modelProps.paramLen);
 
 	const key = str.replace('.', '0');
 	parsers.set(key, {regexp, handler});
