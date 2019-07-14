@@ -3,6 +3,7 @@ import util from 'util';
 import assert from 'assert';
 
 import {parseSmfToSeq} from './smf_parser.js';
+import {parseSyxToSeq} from './syx_parser.js';
 import {analyzeMidiMessage} from './midi_event.js';
 import {analyzeMetaEvent} from './meta_event.js';
 
@@ -14,7 +15,13 @@ const writeFileAsync = util.promisify(fs.writeFile);
 (async () => {
 	try {
 		const smfData = await readFileAsync(process.argv[2]);
-		const seq = parseSmfToSeq(new Uint8Array(smfData));
+		let seq = parseSmfToSeq(new Uint8Array(smfData));
+		if (!seq) {
+			seq = parseSyxToSeq(new Uint8Array(smfData));
+		}
+		if (!seq) {
+			throw new Error('Not SMF or syx file');
+		}
 
 		// Converts the sequence data into a JSON.
 		const json = {...seq};
