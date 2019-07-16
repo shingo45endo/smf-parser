@@ -2041,6 +2041,15 @@ const modelProps = [
 		commands: [0x11, 0x12],
 		addrLen: 4,
 	},
+
+	// Sound Canvas (for Update command)
+	{
+		modelId: 0x45,
+		modelName: 'SC Device',
+		deviceId: 0x00,
+		commands: [[0x00, 0x12]],
+		addrLen: 4,
+	},
 ];
 
 function makeParsers(modelProp) {
@@ -2064,7 +2073,7 @@ function makeParsers(modelProp) {
 
 	const parsers = new Map();
 	for (const command of modelProp.commands) {
-		const commandStr = bytesToHex([command]);
+		const commandStr = bytesToHex((Array.isArray(command)) ? command : [command]);
 
 		let regexp, handler;
 		switch (command) {
@@ -2146,7 +2155,37 @@ function makeParsers(modelProp) {
 			break;
 
 		default:
-			console.assert(false, 'Unexpected case', {command});
+			// Update command
+			if (command[0] === 0x00 && command[1] === 0x12) {
+				regexp = new RegExp(String.raw`^f0 41 ${deviceIdStr} ${modelIdStr} ${commandStr} ${addrStr} (?:.. )+.. f7$`, 'u');
+				handler = ((modelId, modelName, addrLen, commandName) => {
+					const modelIdLen = Array.isArray(modelId) ? modelId.length : 1;
+					return (bytes) => {
+						let index = 0;
+						const [mfrId, deviceId] = stripEnclosure(bytes);
+						console.assert(mfrId === 0x41);
+						index += 3 + modelIdLen;
+
+						index += 2;
+						const commandId = bytes[index - 1];	// TODO: Consider whether it is OK not to distinguish between DT1 and Update.
+
+						const isCheckSumError = checkSumError(bytes.slice(index, -1));
+
+						const address = bytes.slice(index, index + addrLen);
+						console.assert(address.length === addrLen);
+						index += addrLen;
+
+						const payload = bytes.slice(index, -2);
+						const checkSum = bytes[bytes.length - 2];
+
+						return {mfrId, deviceId, modelId, modelName, commandId, commandName, address, payload, checkSum, isCheckSumError};
+					};
+				})(modelProp.modelId, modelProp.modelName, modelProp.addrLen, 'Update');
+				break;
+
+			} else {
+				console.assert(false, 'Unexpected case', {command});
+			}
 			break;
 		}
 
