@@ -1,49 +1,57 @@
 import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError, makeValueFrom7bits} from './sysex_instance.js';
 
-const modelProps = new Map([
+const modelProps = [
 	// M1, M1R
-	[0x19, {
-		name: 'M1',
+	{
+		modelId: 0x19,
+		modelName: 'M1',
 		commands: [0x12, 0x10, 0x1f, 0x16, 0x1c, 0x19, 0x1d, 0x18, 0x0e, 0x0f, 0x11, 0x1a, 0x40, 0x4c, 0x49, 0x4d, 0x48, 0x51, 0x50, 0x4e, 0x41, 0x47, 0x45, 0x42, 0x26, 0x23, 0x24, 0x21, 0x22],
-	}],
+	},
 	// M3R
-	[0x24, {
-		name: 'M3R',
+	{
+		modelId: 0x24,
+		modelName: 'M3R',
 		commands: [0x12, 0x10, 0x1f, 0x16, 0x1c, 0x19, 0x1d, 0x0e, 0x0d, 0x0f, 0x11, 0x1a, 0x40, 0x4c, 0x49, 0x4d, 0x51, 0x52, 0x50, 0x4e, 0x41, 0x47, 0x45, 0x42, 0x26, 0x23, 0x24, 0x21, 0x22],
-	}],
+	},
 	// T1/T2/T3
-	[0x26, {
-		name: 'T1',
+	{
+		modelId: 0x26,
+		modelName: 'T1',
 		commands: [0x12, 0x10, 0x1f, 0x16, 0x1c, 0x19, 0x1d, 0x18, 0x0e, 0x0f, 0x15, 0x11, 0x1a, 0x40, 0x4c, 0x49, 0x4d, 0x48, 0x51, 0x50, 0x44, 0x4e, 0x41, 0x53, 0x47, 0x45, 0x42, 0x26, 0x23, 0x24, 0x21, 0x22],
-	}],
+	},
 	// 01/W, 01R/W
-	[0x2b, {
-		name: '01/W',
+	{
+		modelId: 0x2b,
+		modelName: '01/W',
 		commands: [0x12, 0x10, 0x1f, 0x16, 0x1c, 0x19, 0x1d, 0x18, 0x0e, 0x0d, 0x0f, 0x11, 0x1a, 0x40, 0x4c, 0x49, 0x4d, 0x48, 0x51, 0x52, 0x50, 0x4e, 0x41, 0x53, 0x47, 0x45, 0x42, 0x26, 0x23, 0x24, 0x21, 0x22],
-	}],
+	},
 	// 03R/W
-	[0x30, {
-		name: '03R/W',
+	{
+		modelId: 0x30,
+		modelName: '03R/W',
 		commands: [0x12, 0x10, 0x1f, 0x16, 0x1c, 0x19, 0x1d, 0x06, 0x0e, 0x0d, 0x0f, 0x11, 0x1a, 0x40, 0x4c, 0x49, 0x4d, 0x55, 0x51, 0x52, 0x50, 0x4e, 0x41, 0x53, 0x47, 0x45, 0x42, 0x26, 0x23, 0x24, 0x21, 0x22],
-	}],
+	},
 	// AG-10
-	[0x34, {
-		name: 'AG-10',
+	{
+		modelId: 0x34,
+		modelName: 'AG-10',
 		commands: [0x40],
-	}],
+	},
 	// X3, X2, N264/364
-	[0x35, {
-		name: 'X3',
+	{
+		modelId: 0x35,
+		modelName: 'X3',
 		commands: [0x12, 0x10, 0x1f, 0x16, 0x1c, 0x19, 0x1d, 0x18, 0x0e, 0x0d, 0x0f, 0x11, 0x1a, 0x40, 0x4c, 0x49, 0x4d, 0x48, 0x51, 0x52, 0x50, 0x4e, 0x41, 0x53, 0x47, 0x45, 0x42, 0x26, 0x23, 0x24, 0x21, 0x22],
-	}],
+	},
 	// 05R/W, X5, X5D, X5DR
-	[0x36, {
-		name: '05R/W',
+	{
+		modelId: 0x36,
+		modelName: '05R/W',
 		// Note that the commands 0x33 and 0x68 (for expansion of Multi data) are not available for 05R/W.
 		// But, they (05R/W and X5*) have the same model ID (== 0x36) so they cannot be distinguished each other.
 		commands: [0x12, 0x10, 0x1c, 0x19, 0x1d, 0x06, 0x33, 0x0e, 0x0d, 0x0f, 0x11, 0x1a, 0x40, 0x4c, 0x49, 0x4d, 0x55, 0x68, 0x51, 0x52, 0x50, 0x4e, 0x41, 0x53, 0x42, 0x26, 0x23, 0x24, 0x21, 0x22],
-	}],
-]);
+	},
+];
 
 const commandNamesNS5R = {
 	0x00: 'Mode Change',
@@ -131,8 +139,8 @@ const commandNamesN1R = {
 	0x7f: 'Capture LCD Data',
 };
 
-function makeParsers(modelId, modelProps) {
-	console.assert(modelProps);
+function makeParsers(modelProp) {
+	console.assert(modelProp);
 
 	const commandNames = {
 		0x12: 'Mode Request',
@@ -175,10 +183,10 @@ function makeParsers(modelId, modelProps) {
 		0x22: 'Write Error',
 	};
 
-	const modelIdStr = bytesToHex([modelId]);
+	const modelIdStr = bytesToHex([modelProp.modelId]);
 
 	const parsers = new Map();
-	for (const command of modelProps.commands) {
+	for (const command of modelProp.commands) {
 		const commandStr = bytesToHex([command]);
 
 		let regexp, handler;
@@ -193,7 +201,7 @@ function makeParsers(modelId, modelProps) {
 		case 0x21:	// Write Completed
 		case 0x22:	// Write Error
 			regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} f7$`, 'u');
-			handler = makeHandlerForNoData(modelProps.name, commandNames[command], false);
+			handler = makeHandlerForNoData(modelProp.modelName, commandNames[command], false);
 			break;
 
 		case 0x1c:	// All Program Parameter Dump Request
@@ -205,16 +213,16 @@ function makeParsers(modelId, modelProps) {
 		case 0x0d:	// Drums Data Dump Request
 		case 0x0f:	// All Data Dump Request
 			regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} .. f7$`, 'u');
-			handler = makeHandlerForNoData(modelProps.name, commandNames[command], true);
+			handler = makeHandlerForNoData(modelProp.modelName, commandNames[command], true);
 			break;
 
 		case 0x1f:	// Drums Sound Name Dump Request
 		case 0x16:	// Multi-Sound Name Dump Request
 			{
 				// From T1, those commands require an additional "bank" byte (or 0 as dummy).
-				const isAdditionalBank = (modelId >= 0x26);	// "0x26" means the model ID of T1.
+				const isAdditionalBank = (modelProp.modelId >= 0x26);	// "0x26" means the model ID of T1.
 				regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} ${(isAdditionalBank) ? '.. ' : ''}f7$`, 'u');
-				handler = makeHandlerForNoData(modelProps.name, commandNames[command], isAdditionalBank);
+				handler = makeHandlerForNoData(modelProp.modelName, commandNames[command], isAdditionalBank);
 			}
 			break;
 
@@ -222,7 +230,7 @@ function makeParsers(modelId, modelProps) {
 		case 0x49:	// Combination Parameter Dump
 		case 0x68:	// Multi Setup Data (exp) Dump
 			regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} (?:.. )+f7$`, 'u');
-			handler = makeHandlerForPackedData(modelProps.name, commandNames[command], false);
+			handler = makeHandlerForPackedData(modelProp.modelName, commandNames[command], false);
 			break;
 
 		case 0x4c:	// All Program Parameter Dump
@@ -232,7 +240,7 @@ function makeParsers(modelId, modelProps) {
 		case 0x52:	// Drums Data Dump
 		case 0x50:	// All Data Dump
 			regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} .. (?:.. )+f7$`, 'u');
-			handler = makeHandlerForPackedData(modelProps.name, commandNames[command], true);
+			handler = makeHandlerForPackedData(modelProp.modelName, commandNames[command], true);
 			break;
 
 		case 0x11:	// Program Write Request
@@ -243,7 +251,7 @@ function makeParsers(modelId, modelProps) {
 				console.assert(mfrId === 0x42);
 
 				return {mfrId, deviceId, modelId, modelName, commandId, commandName, bankNo, progNo};
-			})(modelProps.name, commandNames[command]);
+			})(modelProp.modelName, commandNames[command]);
 			break;
 
 		case 0x42:	// Mode Data
@@ -253,7 +261,7 @@ function makeParsers(modelId, modelProps) {
 				console.assert(mfrId === 0x42);
 
 				return {mfrId, deviceId, modelId, modelName, commandId, commandName, modeNo, cardVariation, pcmCardVariation};
-			})(modelProps.name, commandNames[command]);
+			})(modelProp.modelName, commandNames[command]);
 			break;
 
 		case 0x4e:	// Mode Change
@@ -263,11 +271,11 @@ function makeParsers(modelId, modelProps) {
 				console.assert(mfrId === 0x42);
 
 				return {mfrId, deviceId, modelId, modelName, commandId, commandName, modeNo, bankNo};
-			})(modelProps.name, commandNames[command]);
+			})(modelProp.modelName, commandNames[command]);
 			break;
 
 		case 0x41:	// Parameter Change
-			if (modelId === 0x19) {	// M1
+			if (modelProp.modelId === 0x19) {	// M1
 				regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} .. .. .. .. f7$`, 'u');
 				handler = ((modelName, commandName) => (bytes) => {
 					const [mfrId, deviceId, modelId, commandId, paramPage, paramPos, vv0, vv1] = stripEnclosure(bytes);
@@ -277,9 +285,9 @@ function makeParsers(modelId, modelProps) {
 						mfrId, deviceId, modelId, modelName, commandId, commandName, paramPage, paramPos,
 						value: makeValueFrom7bits(vv0, vv1),
 					};
-				})(modelProps.name, commandNames[command]);
+				})(modelProp.modelName, commandNames[command]);
 
-			} else if (modelId === 0x24) {	// M3R
+			} else if (modelProp.modelId === 0x24) {	// M3R
 				regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} .. .. .. f7$`, 'u');
 				handler = ((modelName, commandName) => (bytes) => {
 					const [mfrId, deviceId, modelId, commandId, paramNo, vv0, vv1] = stripEnclosure(bytes);
@@ -289,9 +297,9 @@ function makeParsers(modelId, modelProps) {
 						mfrId, deviceId, modelId, modelName, commandId, commandName, paramNo,
 						value: makeValueFrom7bits(vv0, vv1),
 					};
-				})(modelProps.name, commandNames[command]);
+				})(modelProp.modelName, commandNames[command]);
 
-			} else if (modelId === 0x26 || modelId === 0x2b) {	// T1, 01/W
+			} else if (modelProp.modelId === 0x26 || modelProp.modelId === 0x2b) {	// T1, 01/W
 				regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} .. .. .. .. .. f7$`, 'u');
 				handler = ((modelName, commandName) => (bytes) => {
 					const [mfrId, deviceId, modelId, commandId, paramPage, paramStage, paramPos, vv0, vv1] = stripEnclosure(bytes);
@@ -301,9 +309,9 @@ function makeParsers(modelId, modelProps) {
 						mfrId, deviceId, modelId, modelName, commandId, commandName, paramPage, paramStage, paramPos,
 						value: makeValueFrom7bits(vv0, vv1),
 					};
-				})(modelProps.name, commandNames[command]);
+				})(modelProp.modelName, commandNames[command]);
 
-			} else if (modelId === 0x30 || modelId === 0x35 || modelId === 0x36) {	// 03R/W, X3, 05R/W
+			} else if (modelProp.modelId === 0x30 || modelProp.modelId === 0x35 || modelProp.modelId === 0x36) {	// 03R/W, X3, 05R/W
 				regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} .. .. .. .. f7$`, 'u');
 				handler = ((modelName, commandName) => (bytes) => {
 					const [mfrId, deviceId, modelId, commandId, pp0, pp1, vv0, vv1] = stripEnclosure(bytes);
@@ -314,7 +322,7 @@ function makeParsers(modelId, modelProps) {
 						paramNo: makeValueFrom7bits(pp0, pp1),
 						value:   makeValueFrom7bits(vv0, vv1),
 					};
-				})(modelProps.name, commandNames[command]);
+				})(modelProp.modelName, commandNames[command]);
 
 			} else {
 				console.assert(false);
@@ -322,7 +330,7 @@ function makeParsers(modelId, modelProps) {
 			break;
 
 		case 0x53:	// Drum Kit Parameter Change
-			if (modelId >= 0x2b) {	// T1, 01/W
+			if (modelProp.modelId >= 0x2b) {	// T1, 01/W
 				regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} .. .. .. .. .. .. f7$`, 'u');
 				handler = ((modelName, commandName) => (bytes) => {
 					const [mfrId, deviceId, modelId, commandId, bankNo, drumKitNo, indexNo, paramNo, vv0, vv1] = stripEnclosure(bytes);
@@ -332,7 +340,7 @@ function makeParsers(modelId, modelProps) {
 						mfrId, deviceId, modelId, modelName, commandId, commandName, bankNo, drumKitNo, indexNo, paramNo,
 						value: makeValueFrom7bits(vv0, vv1),
 					};
-				})(modelProps.name, commandNames[command]);
+				})(modelProp.modelName, commandNames[command]);
 			} else {	// 03R/W, X3, 05R/W
 				regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} 00 .. .. .. .. f7$`, 'u');
 				handler = ((modelName, commandName) => (bytes) => {
@@ -343,7 +351,7 @@ function makeParsers(modelId, modelProps) {
 						mfrId, deviceId, modelId, modelName, commandId, commandName, indexNo, paramNo,
 						value: makeValueFrom7bits(vv0, vv1),
 					};
-				})(modelProps.name, commandNames[command]);
+				})(modelProp.modelName, commandNames[command]);
 			}
 			break;
 
@@ -355,7 +363,7 @@ function makeParsers(modelId, modelProps) {
 				console.assert(mfrId === 0x42);
 
 				return {mfrId, deviceId, modelId, modelName, commandId, commandName, num, payload};	// TODO: Implement
-			})(modelProps.name, commandNames[command]);
+			})(modelProp.modelName, commandNames[command]);
 			break;
 
 		case 0x48:	// All Sequence Data Dump
@@ -382,7 +390,7 @@ function makeParsersN(modelId, commands) {
 		0x42: 'NS5R',
 		0x4c: 'N1R',
 	};
-	
+
 	const modelIdStr = bytesToHex([modelId]);
 	const parsers = new Map();
 	for (const command of Object.keys(commands)) {
@@ -538,8 +546,8 @@ function convert7to8(payload) {
 }
 
 // Add SysEx parsers.
-for (const model of modelProps) {
-	const parsers = makeParsers(...model);
+for (const modelProp of modelProps) {
+	const parsers = makeParsers(modelProp);
 	addSysExParsers(parsers);
 }
 addSysExParsers(makeParsersN(0x42, commandNamesNS5R));

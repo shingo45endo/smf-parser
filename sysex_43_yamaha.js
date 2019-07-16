@@ -1,83 +1,99 @@
 import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError, makeValueFrom7bits} from './sysex_instance.js';
 
-const modelPropsXG = new Map([
+const modelPropsXG = [
 	// XG
-	[0x4c, {
-		name: 'XG',
+	{
+		modelId: 0x4c,
+		modelName: 'XG',
 		commands: [0x00, 0x10, 0x20, 0x30],
-	}],
-	[0x49, {
-		name: 'MU Native',
+	},
+	{
+		modelId: 0x49,
+		modelName: 'MU Native',
 		commands: [0x00, 0x10, 0x20, 0x30],
-	}],
-	[0x59, {
-		name: 'MU Native 2',
+	},
+	{
+		modelId: 0x59,
+		modelName: 'MU Native 2',
 		commands: [0x00, 0x10, 0x20, 0x30],
-	}],
+	},
 
-	[0x55, {
-		name: 'VL70-m',
+	{
+		modelId: 0x55,
+		modelName: 'VL70-m',
 		commands: [0x00, 0x10, 0x20, 0x30],
-	}],
-	[0x57, {
-		name: 'PLG-VL',
+	},
+	{
+		modelId: 0x57,
+		modelName: 'PLG-VL',
 		commands: [0x00, 0x10],
-	}],
-	[0x5c, {
-		name: 'PLG-AN',
+	},
+	{
+		modelId: 0x5c,
+		modelName: 'PLG-AN',
 		commands: [0x00, 0x10],
-	}],
-	[0x5d, {
-		name: 'PLG-SG',
+	},
+	{
+		modelId: 0x5d,
+		modelName: 'PLG-SG',
 		commands: [0x00, 0x10/* , 0x30 */],
-	}],
-	[0x62, {
-		name: 'PLG-DX',
+	},
+	{
+		modelId: 0x62,
+		modelName: 'PLG-DX',
 		commands: [0x00, 0x10],
-	}],
-	[0x67, {
-		name: 'PLG-PF/DR/PC/AP',
+	},
+	{
+		modelId: 0x67,
+		modelName: 'PLG-PF/DR/PC/AP',
 		commands: [0x00, 0x10],
-	}],
-]);
+	},
+];
 
-const modelPropsGM = new Map([
-	[0x27, {
-		name: 'TG100',
+const modelPropsGM = [
+	{
+		modelId: 0x27,
+		modelName: 'TG100',
 		commands: [0x10],
-	}],
-	[0x2b, {
-		name: 'TG300',
+	},
+	{
+		modelId: 0x2b,
+		modelName: 'TG300',
 		commands: [0x10, 0x30],
-	}],
-	[0x44, {
-		name: 'MU5',
+	},
+	{
+		modelId: 0x44,
+		modelName: 'MU5',
 		commands: [0x10, 0x30],
-	}],
-]);
+	},
+];
 
-const modelPropsParam = new Map([
+const modelPropsParam = [
 	// TG33
-	[0x26, {
-		name: 'TG33',
+	{
+		modelId: 0x26,
+		modelName: 'TG33',
 		paramLen: 7,
-	}],
+	},
 	// SY85, TG500
-	[0x29, {
-		name: 'SY85',
+	{
+		modelId: 0x29,
+		modelName: 'SY85',
 		paramLen: 4,
-	}],
+	},
 	// SY77, TG77, SY99
-	[0x34, {
-		name: 'SY77',
+	{
+		modelId: 0x34,
+		modelName: 'SY77',
 		paramLen: 4,
-	}],
+	},
 	// TG55, SY55
-	[0x35, {
-		name: 'TG55',
+	{
+		modelId: 0x35,
+		modelName: 'TG55',
 		paramLen: 4,
-	}],
-]);
+	},
+];
 
 const parsersBulkDump = new Map([
 	// Bulk Dump
@@ -144,8 +160,8 @@ const parsersBulkDump = new Map([
 	}],
 ]);
 
-function makeParsersXG(modelId, modelProps) {
-	console.assert(modelProps);
+function makeParsersXG(modelProp) {
+	console.assert(modelProp);
 
 	const commandNames = {
 		0x00: 'Bulk Dump',
@@ -155,8 +171,8 @@ function makeParsersXG(modelId, modelProps) {
 	};
 
 	const parsers = new Map();
-	for (const command of modelProps.commands) {
-		const str = `f0 43 ${bytesToHex([command])[0]}. ${bytesToHex([modelId])}`;
+	for (const command of modelProp.commands) {
+		const str = `f0 43 ${bytesToHex([command])[0]}. ${bytesToHex([modelProp.modelId])}`;
 
 		let regexp, handler;
 		switch (command) {
@@ -172,7 +188,7 @@ function makeParsersXG(modelId, modelProps) {
 				const isCheckSumError = checkSumError(bytes.slice(4, -1));
 
 				return {mfrId, deviceId, modelId, modelName, address, byteCount, payload, checkSum, isCheckSumError, commandName};
-			})(modelProps.name, commandNames[command]);
+			})(modelProp.modelName, commandNames[command]);
 			break;
 
 		case 0x10: // Parameter Change
@@ -183,7 +199,7 @@ function makeParsersXG(modelId, modelProps) {
 				const address = [addrH, addrM, addrL];
 
 				return {mfrId, deviceId, modelId, modelName, address, payload, commandName};
-			})(modelProps.name, commandNames[command]);
+			})(modelProp.modelName, commandNames[command]);
 			break;
 
 		case 0x20: // Bulk Dump Request
@@ -195,7 +211,7 @@ function makeParsersXG(modelId, modelProps) {
 				const address = [addrH, addrM, addrL];
 
 				return {mfrId, deviceId, modelId, modelName, address, commandName};
-			})(modelProps.name, commandNames[command]);
+			})(modelProp.modelName, commandNames[command]);
 			break;
 
 		default:
@@ -210,8 +226,8 @@ function makeParsersXG(modelId, modelProps) {
 	return parsers;
 }
 
-function makeParsersGM(modelId, modelProps) {
-	console.assert(modelProps);
+function makeParsersGM(modelProp) {
+	console.assert(modelProp);
 
 	const commandNames = {
 		0x10: 'Parameter Change',
@@ -219,8 +235,8 @@ function makeParsersGM(modelId, modelProps) {
 	};
 
 	const parsers = new Map();
-	for (const command of modelProps.commands) {
-		const str = `f0 43 ${bytesToHex([command])[0]}. ${bytesToHex([modelId])}`;
+	for (const command of modelProp.commands) {
+		const str = `f0 43 ${bytesToHex([command])[0]}. ${bytesToHex([modelProp.modelId])}`;
 
 		let regexp, handler;
 		switch (command) {
@@ -235,7 +251,7 @@ function makeParsersGM(modelId, modelProps) {
 				const isCheckSumError = checkSumError([...bytes.slice(4, -1)]);
 
 				return {mfrId, deviceId, modelId, modelName, address, payload, checkSum, isCheckSumError, commandName};
-			})(modelProps.name, commandNames[command]);
+			})(modelProp.modelName, commandNames[command]);
 			break;
 
 		case 0x30: // Bulk Dump Request
@@ -248,7 +264,7 @@ function makeParsersGM(modelId, modelProps) {
 				const isCheckSumError = checkSumError(bytes.slice(4, -1));
 
 				return {mfrId, deviceId, modelId, modelName, address, byteCount, checkSum, isCheckSumError, commandName};
-			})(modelProps.name, commandNames[command]);
+			})(modelProp.modelName, commandNames[command]);
 			break;
 
 		default:
@@ -263,13 +279,13 @@ function makeParsersGM(modelId, modelProps) {
 	return parsers;
 }
 
-function makeParsersParam(modelId, modelProps) {
-	console.assert(modelProps);
+function makeParsersParam(modelProp) {
+	console.assert(modelProp);
 
 	const parsers = new Map();
-	const str = `f0 43 1. ${bytesToHex([modelId])}`;
+	const str = `f0 43 1. ${bytesToHex([modelProp.modelId])}`;
 
-	const regexp = new RegExp(String.raw`^${str}(?: ..){${modelProps.paramLen}}(?: ..){2} f7$`, 'u');
+	const regexp = new RegExp(String.raw`^${str}(?: ..){${modelProp.paramLen}}(?: ..){2} f7$`, 'u');
 	const handler = ((modelName, paramLen) => (bytes) => {
 		const [mfrId, deviceId, modelId, ...rest] = stripEnclosure(bytes);
 		console.assert(mfrId === 0x43 && (deviceId & 0xf0) === 0x10 && rest.length === paramLen + 2);
@@ -280,7 +296,7 @@ function makeParsersParam(modelId, modelProps) {
 			commandName: 'Parameter Change',
 			mfrId, deviceId, modelId, modelName, paramNos, value,
 		};
-	})(modelProps.name, modelProps.paramLen);
+	})(modelProp.modelName, modelProp.paramLen);
 
 	const key = str.replace('.', '0');
 	parsers.set(key, {regexp, handler});
@@ -288,16 +304,16 @@ function makeParsersParam(modelId, modelProps) {
 }
 
 // Add SysEx parsers.
-for (const model of modelPropsXG) {
-	const parsers = makeParsersXG(...model);
+for (const modelProp of modelPropsXG) {
+	const parsers = makeParsersXG(modelProp);
 	addSysExParsers(parsers);
 }
-for (const model of modelPropsGM) {
-	const parsers = makeParsersGM(...model);
+for (const modelProp of modelPropsGM) {
+	const parsers = makeParsersGM(modelProp);
 	addSysExParsers(parsers);
 }
-for (const model of modelPropsParam) {
-	const parsers = makeParsersParam(...model);
+for (const modelProp of modelPropsParam) {
+	const parsers = makeParsersParam(modelProp);
 	addSysExParsers(parsers);
 }
 addSysExParsers(parsersBulkDump);
