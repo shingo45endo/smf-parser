@@ -277,9 +277,6 @@ const parsers = new Map([
 			console.assert(mfrId === 0x7e && subId1 === 0x07 && subId2 === 0x01);
 
 			const fileLength = makeValueFrom7bits(length0, length1, length2, length3);
-			if (fileLength !== rest.length) {
-				return null;
-			}
 
 			return {
 				commandName:    'File Dump',
