@@ -1,4 +1,4 @@
-import {addSysExParsers, stripEnclosure, checkSumError, makeValueFrom7bits} from './sysex_instance.js';
+import {addSysExParsers, stripEnclosure, checkSumError, makeValueFrom7bits, convert7to8bits} from './sysex_instance.js';
 
 const parsers = new Map([
 	// [7e-01] Sample Dump Header
@@ -301,21 +301,11 @@ const parsers = new Map([
 				return null;
 			}
 
-			const dataBytes = [];
-			for (let i = 0; i < byteCount; i++) {
-				const indexAuxByte = i % 8 * 8;
-				if (i === indexAuxByte) {
-					continue;
-				}
-				const msb = ((payload[indexAuxByte] & (1 << (7 - i % 8))) !== 0) ? 0x80 : 0x00;
-				dataBytes.push(msb | payload[i]);
-			}
-
 			return {
 				commandName:    'File Dump',
 				subCommandName: 'Data Packet',
 				mfrId, deviceId, subId1, subId2, packetNo, byteCountRaw, byteCount, checkSum, isCheckSumError,
-				data: new Uint8Array(dataBytes),
+				data: convert7to8bits(payload),
 			};
 		},
 	}],
