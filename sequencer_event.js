@@ -10,7 +10,7 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x7b && eventId === 0x00 && payload.length === 2);
 
 			return {
-				commandName:    'YAMAHA XF',
+				commandName:    'XF',
 				subCommandName: 'XF Version ID',
 				mfrId, formatId, eventId, payload,
 				versionId: String.fromCharCode(id0, id1, id2, id3),
@@ -30,7 +30,7 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x7b && eventId === 0x01);
 
 			return {
-				commandName:    'YAMAHA XF',
+				commandName:    'XF',
 				subCommandName: 'Chord Name',
 				mfrId, formatId, eventId, chordRoot, chordType, onBassNote, bassChord,
 			};
@@ -45,7 +45,7 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x7b && eventId === 0x02);
 
 			return {
-				commandName:    'YAMAHA XF',
+				commandName:    'XF',
 				subCommandName: 'Phrase Mark',
 				mfrId, formatId, eventId, rehearsalMark,
 			};
@@ -60,7 +60,7 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x7b && eventId === 0x03);
 
 			return {
-				commandName:    'YAMAHA XF',
+				commandName:    'XF',
 				subCommandName: 'Phrase Mark',
 				mfrId, formatId, eventId, phraseMark, phraseMarkLevel,
 			};
@@ -75,7 +75,7 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x7b && eventId === 0x04);
 
 			return {
-				commandName:    'YAMAHA XF',
+				commandName:    'XF',
 				subCommandName: 'Max Level 8 Phrase Mark',
 				mfrId, formatId, eventId, maxPhraseMark,
 			};
@@ -90,7 +90,7 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x7b && eventId === 0x05);
 
 			return {
-				commandName:    'YAMAHA XF',
+				commandName:    'XF',
 				subCommandName: 'Fingering Number',
 				mfrId, formatId, eventId, noteName,
 				chNo:       cc & 0x1f,
@@ -109,7 +109,7 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x7b && eventId === 0x0c);
 
 			return {
-				commandName:    'YAMAHA XF',
+				commandName:    'XF',
 				subCommandName: 'Guide Track Flag',
 				mfrId, formatId, eventId, melodyTrack1ChNo, melodyTrack2ChNo,
 			};
@@ -124,7 +124,7 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x7b && eventId === 0x10);
 
 			return {
-				commandName:    'YAMAHA XF',
+				commandName:    'XF',
 				subCommandName: 'Information Flag for Gt',
 				mfrId, formatId, eventId, applicablePart, capoLocation, noteNos,
 				firstChNo: xx & 0x1f,
@@ -141,11 +141,11 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x7b && eventId === 0x12 && payload.length % 2 === 0);
 
 			return {
-				commandName:    'YAMAHA XF',
+				commandName:    'XF',
 				subCommandName: 'Chord Voicing for Gt',
 				mfrId, formatId, eventId, payload,
-				chNo:      xx & 0x1f,
-				isCommon:  ((xx & 0x20) !== 0),
+				chNo:     xx & 0x1f,
+				isCommon: ((xx & 0x20) !== 0),
 			};
 		},
 	},
@@ -159,14 +159,14 @@ const parsers = [
 			const pathName = String.fromCharCode(...rest);
 
 			return {
-				commandName:    'YAMAHA XF',
+				commandName:    'XF',
 				subCommandName: 'Lyrics Bitmap',
 				mfrId, formatId, eventId, displayPattern, pathName,
 			};
 		},
 	},
 
-	// YAMAHA: Start Bar
+	// YAMAHA Song Meta Event: Start Bar
 	{
 		regexp: /^43 73 0a 00 04 ..+$/u,
 		handler: (bytes) => {
@@ -175,13 +175,13 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0a && tmp00 === 0x00 && commandId === 0x04);
 
 			return {
-				commandName:    'YAMAHA Meta Event',
+				commandName:    'Song Meta Event',
 				subCommandName: 'Start Bar',
 				mfrId, formatId, eventId, commandId, startBar,
 			};
 		},
 	},
-	// YAMAHA: Track Information
+	// YAMAHA Song Meta Event: Track Information
 	{
 		regexp: /^43 73 0a 00 05(?: ..){16}$/u,
 		handler: (bytes) => {
@@ -191,13 +191,13 @@ const parsers = [
 			const trackStrs = rest.map((e) => String.fromCharCode(e));
 
 			return {
-				commandName:    'YAMAHA Meta Event',
+				commandName:    'Song Meta Event',
 				subCommandName: 'Track Information',
 				mfrId, formatId, eventId, commandId, trackStrs,
 			};
 		},
 	},
-	// YAMAHA: Offset Volume
+	// YAMAHA Song Meta Event: Offset Volume
 	{
 		regexp: /^43 73 0a 00 06(?: ..){16}$/u,
 		handler: (bytes) => {
@@ -206,13 +206,13 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0a && tmp00 === 0x00 && commandId === 0x06);
 
 			return {
-				commandName:    'YAMAHA Meta Event',
+				commandName:    'Song Meta Event',
 				subCommandName: 'Offset Volume',
 				mfrId, formatId, eventId, commandId, offsetVolumes,
 			};
 		},
 	},
-	// YAMAHA: Score Offset Measure
+	// YAMAHA Song Meta Event: Score Offset Measure
 	{
 		regexp: /^43 73 0a 00 07 ..+$/u,
 		handler: (bytes) => {
@@ -221,13 +221,13 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0a && tmp00 === 0x00 && commandId === 0x07);
 
 			return {
-				commandName:    'YAMAHA Meta Event',
+				commandName:    'Song Meta Event',
 				subCommandName: 'Score Offset Measure',
 				mfrId, formatId, eventId, commandId, startBar,
 			};
 		},
 	},
-	// YAMAHA: Style Name
+	// YAMAHA Song Meta Event: Style Name
 	{
 		regexp: /^43 73 0c 00(?: ..)+$/u,
 		handler: (bytes) => {
@@ -237,13 +237,13 @@ const parsers = [
 			const styleName = String.fromCharCode(...rest);
 
 			return {
-				commandName:    'YAMAHA Meta Event',
+				commandName:    'Song Meta Event',
 				subCommandName: 'Style Name',
 				mfrId, formatId, eventId, styleName,
 			};
 		},
 	},
-	// YAMAHA: Song OTS
+	// YAMAHA Song Meta Event: Song OTS
 	{
 		regexp: /^43 73 0d 00(?: ..)+$/u,
 		handler: (bytes) => {
@@ -252,13 +252,13 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0d && tmp00 === 0x00);
 
 			return {
-				commandName:    'YAMAHA Meta Event',
+				commandName:    'Song Meta Event',
 				subCommandName: 'Song OTS',
 				mfrId, formatId, eventId, payload,
 			};
 		},
 	},
-	// YAMAHA: Keyboard Voice
+	// YAMAHA Song Meta Event: Keyboard Voice
 	{
 		regexp: /^43 73 0d 01(?: ..)+$/u,
 		handler: (bytes) => {
@@ -267,7 +267,7 @@ const parsers = [
 			console.assert(mfrId === 0x43 && formatId === 0x73 && eventId === 0x0d && tmp01 === 0x01);
 
 			return {
-				commandName:    'YAMAHA Meta Event',
+				commandName:    'Song Meta Event',
 				subCommandName: 'Keyboard Voice',
 				mfrId, formatId, eventId, payload,
 			};
