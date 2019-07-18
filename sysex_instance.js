@@ -138,6 +138,25 @@ export function makeValueFrom7bits(...bytes) {
 	return bytes.slice(0, 4).reduce((p, c, i) => p | ((c & 0x7f) << (i * 7)));
 }
 
+export function convert7to8bits(bytes) {
+	console.assert(bytes && bytes.length > 0, 'Invalid argument', {bytes});
+
+	const packets = [...bytes].reduce((p, _, i, a) => {
+		if (i % 8 === 0) {
+			p.push(a.slice(i, i + 8));
+		}
+		return p;
+	}, []);
+	const data = packets.reduce((p, c) => {
+		const msbs = c.shift();
+		const bytes = c.map((e, i) => e | (((msbs & (1 << i)) !== 0) ? 0x80 : 0x00));
+		p.push(...bytes);
+		return p;
+	}, []);
+
+	return data;
+}
+
 const sysEx = new SysEx();
 
 export function analyzeSysEx(bytes) {

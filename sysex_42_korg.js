@@ -1,4 +1,4 @@
-import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError, makeValueFrom7bits} from './sysex_instance.js';
+import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError, makeValueFrom7bits, convert7to8bits} from './sysex_instance.js';
 
 const modelProps = [
 	// M1, M1R
@@ -469,7 +469,7 @@ function makeParsersN(modelId, commands) {
 					console.assert(mfrId === 0x42);
 					const isCheckSumError = checkSumError(payload);
 					const checkSum = payload.pop();
-					const decodedPayload = convert7to8(payload);
+					const decodedPayload = convert7to8bits(payload);
 
 					return {mfrId, deviceId, modelId, modelName, commandId, commandName, payload, decodedPayload, checkSum, isCheckSumError};
 				})(modelNamesN[modelId], commands[command]);
@@ -520,29 +520,10 @@ function makeHandlerForPackedData(modelName, commandName, isAdditionalBank) {
 			obj.bankNo = payload.shift();
 		}
 
-		obj.decodedPayload = convert7to8(payload);
+		obj.decodedPayload = convert7to8bits(payload);
 
 		return obj;
 	})(modelName, commandName, isAdditionalBank);
-}
-
-function convert7to8(payload) {
-	console.assert(payload && payload.length > 0);
-
-	const packets = payload.reduce((p, _, i, a) => {
-		if (i % 8 === 0) {
-			p.push(a.slice(i, i + 8));
-		}
-		return p;
-	}, []);
-	const data = packets.reduce((p, c) => {
-		const msbs = c.shift();
-		const bytes = c.map((e, i) => e | (msbs & (1 << i)));
-		p.push(...bytes);
-		return p;
-	}, []);
-
-	return data;
 }
 
 // Add SysEx parsers.
