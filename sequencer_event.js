@@ -274,6 +274,21 @@ const parsers = [
 		},
 	},
 
+	// YAMAHA: MIDI Port Prefix (undocumented?)
+	{
+		regexp: /^43 00 01 ..+$/u,
+		handler: (bytes) => {
+			console.assert(bytes && bytes.length === 4);
+			const [mfrId, tmp00, tmp01, portNo] = bytes;
+			console.assert(mfrId === 0x43 && tmp00 === 0x00 && tmp01 === 0x01);
+
+			return {
+				commandName: 'MIDI Port Prefix',
+				mfrId, portNo,
+			};
+		},
+	},
+
 	// Microsoft: Dual-Mode Mark for Windows MIDI Mapper
 	{
 		regexp: /^00 00 41$/u,
