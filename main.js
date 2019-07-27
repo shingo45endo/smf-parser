@@ -26,8 +26,8 @@ const writeFileAsync = util.promisify(fs.writeFile);
 		// Converts the sequence data into a JSON.
 		const json = {...seq};
 		json.tracks = [];
-		for (const track of seq.tracks) {
-			json.tracks.push(...[...track.entries()].reduce((p, c) => {
+		for (const seqTrack of seq.tracks) {
+			const track = [...seqTrack.entries()].reduce((p, c) => {
 				const [timestamp, events] = c;
 				for (const bytes of events) {
 					const mes = (bytes[0] !== 0xff) ? analyzeMidiMessage(bytes) : analyzeMetaEvent(bytes);
@@ -42,7 +42,8 @@ const writeFileAsync = util.promisify(fs.writeFile);
 					p.push(obj);
 				}
 				return p;
-			}, []));
+			}, []);
+			json.tracks.push(track);
 		}
 
 		await writeFileAsync(`${process.argv[2]}.json`, JSON.stringify(json, null, 4));
