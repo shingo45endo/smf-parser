@@ -128,6 +128,18 @@ const parsers = {
 			};
 		},
 	},
+	0x60: {
+		name: 'XMF Patch Type Prefix',
+		handler: (payload) => {
+			console.assert(payload && 'length' in payload);
+			if (payload.length !== 1) {
+				return null;
+			}
+			return {
+				parameter: payload[0],
+			};
+		},
+	},
 	0x7f: {
 		name: 'Sequencer-Specific Meta-Event',
 		handler: (payload) => {
