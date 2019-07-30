@@ -571,8 +571,41 @@ const parsers = new Map([
 			const [mfrId, deviceId, subId1, subId2, versionInfo, mnId0, mnId1, mnId2, mnId3, ...data] = stripEnclosure(bytes);
 			console.assert(mfrId === 0x7e && subId1 === 0x0d);
 
+			const subCommandNames = {
+				// Protocol Negotiation Messages
+				0x10: 'Initiator: Protocol Inquiry & Report ProtocolCapabilities',
+				0x11: 'Responder: Report Protocol Capabilities',
+				0x12: 'Initiator: Set New Selected Protocol',
+				0x13: 'Initiator: Test New Protocol Initiator to Responder',
+				0x14: 'Responder: Test New Protocol Responder to Initiator',
+				0x15: 'Initiator: Confirmation Protocol Established',
+
+				// Profile Configuration Messages
+				0x20: 'Profile Inquiry',
+				0x21: 'Responder Reply Profile Capabilities',
+				0x22: 'Set Profile On',
+				0x23: 'Set Profile Off',
+				0x24: 'Profile Enabled Report',
+				0x25: 'Profile Disabled Report',
+
+				// Property Exchange Messages
+				0x30: 'Inquiry Property Exchange Capabilities',
+				0x31: 'Reply to Property Exchange Capabilities',
+				0x32: 'Inquiry Has Property',
+				0x33: 'Reply to Has Property',
+				0x34: 'Inquiry Get Property',
+				0x35: 'Reply to Get Property',
+				0x36: 'Inquiry Set Property',
+				0x37: 'Reply to Set Property',
+				0x3f: 'NotifyMessage',
+
+				// Management Messages
+				0x7f: 'NAK',
+			};
+
 			return {
-				commandName: 'MIDI Capability Inquiry',
+				commandName:    'MIDI Capability Inquiry',
+				subCommandName: subCommandNames[subId2] || 'Reserved',
 				mfrId, deviceId, subId1, subId2, versionInfo, data,
 				mnId: makeValueFrom7bits(mnId0, mnId1, mnId2, mnId3),
 			};
