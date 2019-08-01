@@ -573,7 +573,7 @@ const parsers = new Map([
 
 			const subCommandNames = {
 				// Protocol Negotiation Messages
-				0x10: 'Initiator: Protocol Inquiry & Report ProtocolCapabilities',
+				0x10: 'Initiator: Protocol Inquiry & Report Protocol Capabilities',
 				0x11: 'Responder: Report Protocol Capabilities',
 				0x12: 'Initiator: Set New Selected Protocol',
 				0x13: 'Initiator: Test New Protocol Initiator to Responder',
@@ -597,7 +597,7 @@ const parsers = new Map([
 				0x35: 'Reply to Get Property',
 				0x36: 'Inquiry Set Property',
 				0x37: 'Reply to Set Property',
-				0x3f: 'NotifyMessage',
+				0x3f: 'Notify Message',
 
 				// Management Messages
 				0x7f: 'NAK',
