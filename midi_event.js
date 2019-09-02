@@ -166,10 +166,7 @@ function analyzeChannelMessage(bytes) {
 	}
 
 	if (k === 0xb) {
-		mes.subCommandName = controllerNames[mes.param];
-		if (!mes.subCommandName) {
-			mes.subCommandName = `Undefined (CC#${mes.param})`;
-		}
+		mes.subCommandName = controllerNames[mes.param] || `Undefined (CC#${mes.param})`;
 	}
 
 	return mes;
