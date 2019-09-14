@@ -1,4 +1,4 @@
-import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError} from './sysex_instance.js';
+import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError, convert7to8bits} from './sysex_instance.js';
 
 const modelProps = [
 	// MT-32, CM-32L, CM-32P, and CM-64 (including D-10/110, D-20, D-5, and GR-50)
@@ -2177,8 +2177,9 @@ function makeParsers(modelProp) {
 
 						const payload = bytes.slice(index, -2);
 						const checkSum = bytes[bytes.length - 2];
+						const decodedPayload = convert7to8bits([...payload]);
 
-						return {mfrId, deviceId, modelId, modelName, commandId, commandName, address, payload, checkSum, isCheckSumError};
+						return {mfrId, deviceId, modelId, modelName, commandId, commandName, address, payload, decodedPayload, checkSum, isCheckSumError};
 					};
 				})(modelProp.modelId, modelProp.modelName, modelProp.addrLen, 'Update');
 				break;
