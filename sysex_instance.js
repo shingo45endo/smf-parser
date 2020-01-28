@@ -62,28 +62,24 @@ export class SysEx {
 		return isValidSysEx(bytes) && this._findParser(bytes) !== null;
 	}
 
-	addParsers(parsers) {
-		console.assert(parsers instanceof Map, 'Invalid argument', {parsers});
+	addParser(key, parser) {
+		console.assert(/^(?:.. )+..$/u.test(key), 'Invalid key format', {key, value: parser});
+		console.assert(!this._parsers.has(key), 'Already exists', {key, value: parser});
 
-		parsers.forEach((value, key) => {
-			console.assert(/^(?:.. )+..$/u.test(key), 'Invalid key format', {key, value});
-			console.assert(!this._parsers.has(key), 'Already exists', {key, value});
+		// Adds a parser.
+		this._parsers.set(key, parser);
 
-			// Adds a parser.
-			this._parsers.set(key, value);
-
-			// Registers parsers to the map with various length of keys.
-			const strs = key.split(' ');
-			for (let i = 0; i < strs.length; i++) {
-				const key = strs.slice(0, i + 1).join(' ');
-				if (!this._map.has(key)) {
-					this._map.set(key, []);
-				}
-				const array = this._map.get(key);
-				console.assert(Array.isArray(array));
-				array.push(value);
+		// Registers parsers to the map with various length of keys.
+		const strs = key.split(' ');
+		for (let i = 0; i < strs.length; i++) {
+			const key = strs.slice(0, i + 1).join(' ');
+			if (!this._map.has(key)) {
+				this._map.set(key, []);
 			}
-		});
+			const array = this._map.get(key);
+			console.assert(Array.isArray(array));
+			array.push(parser);
+		}
 	}
 
 	getParsers(sysExIds) {
@@ -164,7 +160,11 @@ export function analyzeSysEx(bytes) {
 }
 
 export function addSysExParsers(parsers) {
-	sysEx.addParsers(parsers);
+	console.assert(parsers instanceof Map, 'Invalid argument', {parsers});
+
+	parsers.forEach((parser, key) => {
+		sysEx.addParser(key, parser);
+	});
 }
 
 export function createSubsetSysExParser(sysExIds) {
