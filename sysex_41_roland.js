@@ -2192,6 +2192,11 @@ function makeParsers(modelProp) {
 
 		const key = `f0 41 ${bytesToHex([modelProp.deviceId || 0x00])} ${modelIdStr} ${commandStr}`;
 		parsers.set(key, {regexp, handler});
+
+		if (modelProp.deviceId && (new RegExp(deviceIdStr, 'u')).test('00')) {
+			const key2 = `f0 41 00 ${modelIdStr} ${commandStr}`;
+			parsers.set(key2, {regexp, handler});
+		}
 	}
 
 	return parsers;
