@@ -51,6 +51,9 @@
 			"named": "never",
 			"asyncArrow": "always"
 		}],
+		"spaced-comment": ["error", "always", {
+			"exceptions": ["EMPTY", "FALLTHRU", "FALLTHROUGH", "NOTREACHED"]
+		}],
 		"yoda": ["error", "never", {"exceptRange": true}],
 
 		"no-warning-comments": "warn",
@@ -63,7 +66,9 @@
 		"id-length": "off",
 		"init-declarations": "off",
 		"line-comment-position": "off",
+		"lines-between-class-members": "off",
 		"lines-around-comment": "off",
+		"max-classes-per-file": "off",
 		"max-depth": "off",
 		"max-len": "off",
 		"max-lines": "off",
