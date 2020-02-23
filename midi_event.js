@@ -48,7 +48,7 @@ const controllerNames = {
 	0x22: 'Breath Controller (LSB)',
 	0x24: 'Foot Controller (LSB)',
 	0x25: 'Portamento Time (LSB)',
-	0x26: 'Data entry (LSB)',
+	0x26: 'Data Entry (LSB)',
 	0x27: 'Channel Volume (LSB)',
 	0x28: 'Balance (LSB)',
 	0x2a: 'Pan (LSB)',

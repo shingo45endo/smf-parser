@@ -107,7 +107,7 @@ function isValidSysEx(bytes) {
 	}
 
 	// Is there any valid payload? ("3": f0, f7, and device ID)
-	if (bytes.length - 3 - ((bytes[1] !== 0x00) ? 1 : 3)  <= 0) {
+	if (bytes.length - 3 - ((bytes[1] !== 0x00) ? 1 : 3) <= 0) {
 		return false;
 	}
 

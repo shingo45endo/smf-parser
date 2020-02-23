@@ -46,7 +46,7 @@ const parsers = [
 
 			return {
 				commandName:    'XF',
-				subCommandName: 'Phrase Mark',
+				subCommandName: 'Rehearsal Mark',
 				mfrId, formatId, eventId, rehearsalMark,
 			};
 		},
