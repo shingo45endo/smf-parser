@@ -21,6 +21,6 @@
     "esm": "^3.2.25"
   },
   "devDependencies": {
-    "eslint": "^5.16.0"
+    "eslint": "^6.8.0"
   }
 }
