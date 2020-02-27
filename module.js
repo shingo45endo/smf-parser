@@ -275,6 +275,8 @@ export class MidiModule {
 							}
 						}
 						break;
+
+					// no default
 					}
 				}
 			}
