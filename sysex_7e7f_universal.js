@@ -1,4 +1,4 @@
-import {addSysExParsers, stripEnclosure, checkSumError, makeValueFrom7bits, convert7to8bits} from './sysex_instance.js';
+import {addSysExParsers, stripEnclosure, checkSumError, makeValueFrom7bits, convert7to8bits, splitArrayByN} from './sysex_instance.js';
 
 const parsers = new Map([
 	// [7e-01] Sample Dump Header
@@ -1075,17 +1075,6 @@ function handleScaleTuning2byte(bytes) {
 function checkXorError(bytes) {
 	console.assert(bytes && bytes.length);
 	return bytes.reduce((p, c) => p ^ c) === 0;
-}
-
-function splitArrayByN(elems, num) {
-	console.assert(elems && elems.length);
-	return elems.reduce((p, _, i, a) => {
-		if (i % num === 0) {
-			p.push(a.slice(i, i + num));
-			console.assert(p[p.length - 1].length === num);
-		}
-		return p;
-	}, []);
 }
 
 // Add parsers to the global SysEx parser.

@@ -8,3 +8,4 @@ import './sysex_40_kawai.js';
 import './sysex_44_casio.js';
 import './sysex_47_akai.js';
 import './sysex_55_suzuki.js';
+import './sysex_18_e-mu.js';

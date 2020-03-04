@@ -153,6 +153,17 @@ export function convert7to8bits(bytes) {
 	return data;
 }
 
+export function splitArrayByN(elems, num) {
+	console.assert(elems && elems.length);
+	return elems.reduce((p, _, i, a) => {
+		if (i % num === 0) {
+			p.push(a.slice(i, i + num));
+			console.assert(p[p.length - 1].length === num);
+		}
+		return p;
+	}, []);
+}
+
 const sysEx = new SysEx();
 
 export function analyzeSysEx(bytes) {
