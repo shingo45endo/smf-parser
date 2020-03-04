@@ -180,6 +180,8 @@ export function addSysExParsers(parsers) {
 
 export function createSubsetSysExParser(sysExIds) {
 	const subset = new SysEx();
-	subset.addParsers(sysEx.getParsers(sysExIds));
+	sysEx.getParsers(sysExIds).forEach((parser, key) => {
+		subset.addParser(key, parser);
+	});
 	return subset;
 }
