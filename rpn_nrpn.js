@@ -552,6 +552,77 @@ const parsersNrpn = {
 		return (mes) ? {modelName: 'DreamSAM', ...mes} : null;
 	},
 
+	// Hyper Canvas / TTS-1
+	0x58: (paramM, paramL, valueM, valueL) => {
+		console.assert(paramM === 0x58);
+		let mes = {
+			0x01: {
+				commandName: 'Character',
+			},
+			0x20: {
+				commandName: 'Tone Control Switch',
+			},
+			0x22: {
+				commandName: 'Tone Control Bass Gain',
+			},
+			0x24: {
+				commandName: 'Tone Control Treble Gain',
+			},
+			0x27: {
+				commandName: 'Tone Control Mid Gain',
+			},
+			0x40: {
+				commandName: 'Reverb Switch',
+			},
+			0x41: {
+				commandName: 'Reverb Type',
+			},
+			0x42: {
+				commandName: 'Reverb Time',
+			},
+			0x50: {
+				commandName: 'Chorus Switch',
+			},
+			0x51: {
+				commandName: 'Chorus Type',
+			},
+			0x52: {
+				commandName: 'Chorus Rate',
+			},
+			0x53: {
+				commandName: 'Chorus Depth',
+			},
+			0x54: {
+				commandName: 'Chorus Feedback',
+			},
+			0x55: {
+				commandName: 'Chorus Send to Reverb',
+			},
+			0x70: {
+				commandName: 'Master Volume',
+			},
+			0x71: {
+				commandName: 'Master Tuning',
+			},
+			0x72: {
+				commandName: 'Master Key Shift',
+			},
+			0x7f: {
+				commandName: 'System Reset',
+			},
+		}[paramL];
+
+		if (!mes) {
+			if (0x30 <= paramL && paramL <= 0x3b) {
+				mes = {
+					commandName: `Scale Tune ${['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][paramL - 0x30]}`,
+				};
+			}
+		}
+
+		return (mes) ? {modelName: 'Hyper Canvas', ...mes} : null;
+	},
+
 	// NSX-1 Vocal Part Settings
 	0x70: (paramM, paramL, valueM, valueL) => {
 		console.assert(paramM === 0x70);
