@@ -554,7 +554,7 @@ const parsersNrpn = {
 
 	// NSX-1 Vocal Part Settings
 	0x70: (paramM, paramL, valueM, valueL) => {
-		console.assert(paramM === 0x01);
+		console.assert(paramM === 0x70);
 		const mes = {
 			0x01: {
 				commandName: 'Enable Auto Pitch Control',
@@ -596,7 +596,7 @@ const parsersNrpn = {
 
 	// NSX-1 Phonetic Symbols
 	0x71: (paramM, paramL, valueM, valueL) => {
-		console.assert(paramM === 0x01);
+		console.assert(paramM === 0x71);
 		const mes = {
 			0x12: {
 				commandName: 'Start of Phonetic Symbols',
