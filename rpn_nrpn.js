@@ -69,7 +69,7 @@ const parsersRpn = {
 			},
 		}[paramL];
 
-		return {value: (valueM << 7) | valueL, ...mes};
+		return (mes) ? {value: (valueM << 7) | valueL, ...mes} : null;
 	},
 
 	// RPN Null
@@ -549,7 +549,7 @@ const parsersNrpn = {
 			},
 		}[paramL];
 
-		return {modelName: 'DreamSAM', ...mes};
+		return (mes) ? {modelName: 'DreamSAM', ...mes} : null;
 	},
 
 	// NSX-1 Vocal Part Settings
@@ -591,7 +591,7 @@ const parsersNrpn = {
 			},
 		}[paramL];
 
-		return {modelName: 'NSX-1', ...mes};
+		return (mes) ? {modelName: 'NSX-1', ...mes} : null;
 	},
 
 	// NSX-1 Phonetic Symbols
@@ -609,7 +609,7 @@ const parsersNrpn = {
 			},
 		}[paramL];
 
-		return {modelName: 'NSX-1', ...mes};
+		return (mes) ? {modelName: 'NSX-1', ...mes} : null;
 	},
 
 	// EMU8000
@@ -705,7 +705,7 @@ function handleEmu8000Nrpn(paramM, paramL, valueM, valueL) {
 		},
 	}[paramL];
 
-	return {modelName: 'EMU8000', ...mes};
+	return (mes) ? {modelName: 'EMU8000', ...mes} : null;
 }
 
 export const [analyzeRpn, analyzeNrpn] = ['rpn', 'nrpn'].map((kind) => {
