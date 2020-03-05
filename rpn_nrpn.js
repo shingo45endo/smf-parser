@@ -683,6 +683,218 @@ const parsersNrpn = {
 		return (mes) ? {modelName: 'NSX-1', ...mes} : null;
 	},
 
+	// SoundFont v2
+	0x78: (paramM, paramL, valueM, valueL) => {
+		console.assert(paramM === 0x78);
+		let mes = {
+			0x00: {	// startAddrsOffset
+				commandName: 'Start Address Offset',
+			},
+			0x01: {	// endAddrsOffset
+				commandName: 'End Address Offset',
+			},
+			0x02: {	// startloopAddrsOffset
+				commandName: 'Start Loop Address Offset',
+			},
+			0x03: {	// endloopAddrsOffset
+				commandName: 'End Loop Address Offset',
+			},
+			0x04: {	// startAddrsCoarseOffset
+				commandName: 'Start Address Coarse Offset',
+			},
+			0x05: {	// modLfoToPitch
+				commandName: 'Mod LFO to Pitch',
+			},
+			0x06: {	// vibLfoToPitch
+				commandName: 'Vib LFO to Pitch',
+			},
+			0x07: {	// modEnvToPitch
+				commandName: 'Mod Env to Pitch',
+			},
+			0x08: {	// initialFilterFc
+				commandName: 'Initial Filter Fc',
+			},
+			0x09: {	// initialFilterQ
+				commandName: 'Initial Filter Q',
+			},
+			0x0a: {	// modLfoToFilterFc
+				commandName: 'Mod LFO to Filter Fc',
+			},
+			0x0b: {	// modEnvToFilterFc
+				commandName: 'Mod Env to Filter Fc',
+			},
+			0x0c: {	// endAddrsCoarseOffset
+				commandName: 'End Address Coarse Offset',
+			},
+			0x0d: {	// modLfoToVolume
+				commandName: 'Mod LFO to Volume',
+			},
+			0x0e: {	// unused1
+				commandName: 'Unused 1',
+			},
+			0x0f: {	// chorusEffectsSend
+				commandName: 'Chorus Effects Send',
+			},
+			0x10: {	// reverbEffectsSend
+				commandName: 'Reverb Effects Send',
+			},
+			0x11: {	// pan
+				commandName: 'Pan',
+			},
+			0x12: {	// unused2
+				commandName: 'Unused 2',
+			},
+			0x13: {	// unused3
+				commandName: 'Unused 3',
+			},
+			0x14: {	// unused4
+				commandName: 'Unused 4',
+			},
+			0x15: {	// delayModLFO
+				commandName: 'Delay Mod LFO',
+			},
+			0x16: {	// freqModLFO
+				commandName: 'Freq Mod LFO',
+			},
+			0x17: {	// delayVibLFO
+				commandName: 'Delay Vib LFO',
+			},
+			0x18: {	// freqVibLFO
+				commandName: 'Freq Vib LFO',
+			},
+			0x19: {	// delayModEnv
+				commandName: 'Delay Mod Env',
+			},
+			0x1a: {	// attackModEnv
+				commandName: 'Attack Mod Env',
+			},
+			0x1b: {	// holdModEnv
+				commandName: 'Hold Mod Env',
+			},
+			0x1c: {	// decayModEnv
+				commandName: 'Decay Mod Env',
+			},
+			0x1d: {	// sustainModEnv
+				commandName: 'Sustain Mod Env',
+			},
+			0x1e: {	// releaseModEnv
+				commandName: 'Release Mod Env',
+			},
+			0x1f: {	// keynumToModEnvHold
+				commandName: 'Key Number to Mod Env Hold',
+			},
+			0x20: {	// keynumToModEnvDecay
+				commandName: 'Key Number to Mod Env Decay',
+			},
+			0x21: {	// delayVolEnv
+				commandName: 'Delay Vol Env',
+			},
+			0x22: {	// attackVolEnv
+				commandName: 'Attack Vol Env',
+			},
+			0x23: {	// holdVolEnv
+				commandName: 'Hold Vol Env',
+			},
+			0x24: {	// decayVolEnv
+				commandName: 'Decay Vol Env',
+			},
+			0x25: {	// sustainVolEnv
+				commandName: 'Sustain Vol Env',
+			},
+			0x26: {	// releaseVolEnv
+				commandName: 'Release Vol Env',
+			},
+			0x27: {	// keynumToVolEnvHold
+				commandName: 'Key Number to Vol Env Hold',
+			},
+			0x28: {	// keynumToVolEnvDecay
+				commandName: 'Key Number to Vol Env Decay',
+			},
+			0x29: {	// instrument
+				commandName: 'Instrument',
+			},
+			0x2a: {	// reserved1
+				commandName: 'Reserved 1',
+			},
+			0x2b: {	// keyRange
+				commandName: 'Key Range',
+			},
+			0x2c: {	// velRange
+				commandName: 'Vel Range',
+			},
+			0x2d: {	// startloopAddrsCoarseOffset
+				commandName: 'Start Loop Address Coarse Offset',
+			},
+			0x2e: {	// keynum
+				commandName: 'Key Number',
+			},
+			0x2f: {	// velocity
+				commandName: 'Velocity',
+			},
+			0x30: {	// initialAttenuation
+				commandName: 'Initial Attenuation',
+			},
+			0x31: {	// reserved2
+				commandName: 'Reserved 2',
+			},
+			0x32: {	// endloopAddrsCoarseOffset
+				commandName: 'End Loop Address Coarse Offset',
+			},
+			0x33: {	// coarseTune
+				commandName: 'Coarse Tune',
+			},
+			0x34: {	// fineTune
+				commandName: 'Fine Tune',
+			},
+			0x35: {	// sampleID
+				commandName: 'Sample ID',
+			},
+			0x36: {	// sampleModes
+				commandName: 'Sample Modes',
+			},
+			0x37: {	// reserved3
+				commandName: 'Reserved 3',
+			},
+			0x38: {	// scaleTuning
+				commandName: 'Scale Tuning',
+			},
+			0x39: {	// exclusiveClass
+				commandName: 'Exclusive Class',
+			},
+			0x3a: {	// overridingRootKey
+				commandName: 'Overriding Root Key',
+			},
+			0x3b: {	// unused5
+				commandName: 'Unused 5',
+			},
+			0x3c: {	// endOper
+				commandName: 'Unused',
+			},
+		}[paramL];
+
+		if (!mes) {
+			if (paramL < 100) {
+				mes = {
+					commandName: `Generator No.${paramL}`,
+				};
+			} else {
+				mes = {
+					100: {
+						commandName: 'Generator No. +100',
+					},
+					101: {
+						commandName: 'Generator No. +1000',
+					},
+					102: {
+						commandName: 'Generator No. +10000',
+					},
+				}[paramL];
+			}
+		}
+
+		return (mes) ? {modelName: 'SoundFont', ...mes} : null;
+	},
+
 	// EMU8000
 	0x7d: handleEmu8000Nrpn,
 	0x7e: handleEmu8000Nrpn,
