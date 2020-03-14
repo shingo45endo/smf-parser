@@ -1,4 +1,4 @@
-import {addSysExParsers, stripEnclosure, checkSumError, makeValueFrom7bits, convert7to8bits, splitArrayByN} from './sysex_instance.js';
+import {addSysExParsers, stripEnclosure, checkSumError, makeValueFrom7bits, convert7to8bits, splitArrayByN} from './sysex_common.js';
 
 const parsers = new Map([
 	// [7e-01] Sample Dump Header

@@ -1,4 +1,4 @@
-export {SysEx, analyzeSysEx} from './sysex_instance.js';
+export {analyzeSysEx} from './sysex_common.js';
 
 import './sysex_7e7f_universal.js';
 import './sysex_41_roland.js';

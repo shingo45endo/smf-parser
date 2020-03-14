@@ -1,4 +1,4 @@
-import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError, makeValueFrom7bits} from './sysex_instance.js';
+import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError, makeValueFrom7bits} from './sysex_common.js';
 
 const modelPropsXG = [
 	// XG

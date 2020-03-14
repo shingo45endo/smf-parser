@@ -1,4 +1,4 @@
-import {addSysExParsers, bytesToHex, stripEnclosure} from './sysex_instance.js';
+import {addSysExParsers, bytesToHex, stripEnclosure} from './sysex_common.js';
 
 const modelNames = {
 	0x08: 'GMega/K11',

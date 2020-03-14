@@ -1,4 +1,4 @@
-import {bytesToHex} from './sysex_instance.js';
+import {bytesToHex} from './sysex_common.js';
 
 const parsers = [
 	// YAMAHA XF: XF Version ID

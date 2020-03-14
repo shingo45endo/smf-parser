@@ -1,4 +1,4 @@
-import {addSysExParsers, stripEnclosure} from './sysex_instance.js';
+import {addSysExParsers, stripEnclosure} from './sysex_common.js';
 
 const parsers = new Map([
 	['f0 44 0b 09', {

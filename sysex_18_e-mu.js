@@ -1,4 +1,4 @@
-import {addSysExParsers, bytesToHex, stripEnclosure, makeValueFrom7bits, splitArrayByN} from './sysex_instance.js';
+import {addSysExParsers, bytesToHex, stripEnclosure, makeValueFrom7bits, splitArrayByN} from './sysex_common.js';
 
 const modelProps = [
 	// Proteus 1/2/3, XR, Classic Keys
