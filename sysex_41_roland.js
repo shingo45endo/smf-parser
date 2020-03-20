@@ -865,7 +865,7 @@ const modelProps = [
 		addrLen: 4,
 	},
 	// VK-7 (Organ)
-	// PK-7A, PK-25A�iMIDI Pedal Keyboard)
+	// PK-7A, PK-25A（MIDI Pedal Keyboard)
 	{
 		modelId: [0x00, 0x08],
 		modelName: 'VK-7',
@@ -1815,7 +1815,7 @@ const modelProps = [
 		commands: [0x11, 0x12],
 		addrLen: 4,
 	},
-	// GAIA SH-01 (Synthesizer))
+	// GAIA SH-01 (Synthesizer)
 	{
 		modelId: [0x00, 0x00, 0x41],
 		modelName: 'SH-01',

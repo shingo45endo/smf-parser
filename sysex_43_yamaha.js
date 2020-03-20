@@ -20,7 +20,7 @@ const modelPropsXG = [
 
 	{
 		modelId: 0x55,
-		modelName: 'VL70-m',
+		modelName: 'VL70-m/P50-m',
 		commands: [0x00, 0x10, 0x20, 0x30],
 	},
 	{
@@ -30,7 +30,7 @@ const modelPropsXG = [
 	},
 	{
 		modelId: 0x5c,
-		modelName: 'PLG-AN',
+		modelName: 'PLG-AN/AN1x',
 		commands: [0x00, 0x10],
 	},
 	{
