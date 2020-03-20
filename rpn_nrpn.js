@@ -1,5 +1,3 @@
-/* eslint no-unused-vars: ["error", {"argsIgnorePattern": "value[ML]"}] */
-
 const parsersRpn = {
 	// Registered Parameters
 	0x00: (paramM, paramL, valueM, valueL) => {
@@ -12,7 +10,7 @@ const parsersRpn = {
 			},
 			0x01: {
 				commandName: 'Master Fine Tune',
-				value: (valueM << 7) | valueL,
+				value: ((valueM << 7) | valueL) - 0x2000,
 			},
 			0x02: {
 				commandName: 'Master Coarse Tune',
@@ -73,7 +71,7 @@ const parsersRpn = {
 	},
 
 	// RPN Null
-	0x7f: (paramM, paramL, valueM, valueL) => {
+	0x7f: (paramM, paramL) => {
 		console.assert(paramM === 0x7f);
 		if (paramL === 0x7f) {
 			return {
@@ -87,22 +85,24 @@ const parsersRpn = {
 
 const parsersNrpn = {
 	// Misc.
-	0x00: (paramM, paramL, valueM, valueL) => {
+	0x00: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x00);
 		return {
 			0x00: {
 				modelName:   'PLG-VH',
 				commandName: 'Harmony Mute',
+				value: valueM,
 			},
 			0x01: {
 				modelName:   'SG01',
 				commandName: 'Reverb Select',
+				value: valueM,
 			},
 		}[paramL];
 	},
 
 	// GS/XG Part Settings
-	0x01: (paramM, paramL, valueM, valueL) => {
+	0x01: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x01);
 		const mes = {
 			0x08: {
@@ -221,11 +221,11 @@ const parsersNrpn = {
 			},
 		}[paramL];
 
-		return mes;
+		return (mes) ? {value: valueM, ...mes} : null;
 	},
 
 	// PLG100-VH Harmony Settings
-	0x02: (paramM, paramL, valueM, valueL) => {
+	0x02: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x02);
 		const kind = (paramL & 0xf0) >> 4;
 		const index = paramL & 0x0f;
@@ -233,6 +233,7 @@ const parsersNrpn = {
 			return {
 				modelName:   'PLG100-VH',
 				commandName: `Harmony ${index + 1} ${['Volume', 'Panpot', 'Detune'][kind]}`,
+				value: valueM,
 			};
 		} else {
 			return null;
@@ -240,197 +241,220 @@ const parsersNrpn = {
 	},
 
 	// GS/XG Drum Settings
-	0x14: (paramM, paramL, valueM, valueL) => {
+	0x14: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x14);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum Filter Cutoff Frequency',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x15: (paramM, paramL, valueM, valueL) => {
+	0x15: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x15);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum Filter Resonance',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x16: (paramM, paramL, valueM, valueL) => {
+	0x16: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x16);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum EG Attack Rate',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x17: (paramM, paramL, valueM, valueL) => {
+	0x17: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x17);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum EG Decay Rate',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x18: (paramM, paramL, valueM, valueL) => {
+	0x18: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x18);
 		return {
 			modelName:   'GS/XG',
 			commandName: 'Drum Instrument Pitch Coarse',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x19: (paramM, paramL, valueM, valueL) => {
+	0x19: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x19);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum Instrument Pitch Fine',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x1a: (paramM, paramL, valueM, valueL) => {
+	0x1a: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x1a);
 		return {
 			modelName:   'GS/XG',
 			commandName: 'Drum Instrument Level',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x1c: (paramM, paramL, valueM, valueL) => {
+	0x1c: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x1c);
 		return {
 			modelName:   'GS/XG',
 			commandName: 'Drum Instrument Panpot',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x1d: (paramM, paramL, valueM, valueL) => {
+	0x1d: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x1d);
 		return {
 			modelName:   'GS/XG',
 			commandName: 'Drum Instrument Reverb Send Level',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x1e: (paramM, paramL, valueM, valueL) => {
+	0x1e: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x1e);
 		return {
 			modelName:   'GS/XG',
 			commandName: 'Drum Instrument Chorus Send Level',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x1f: (paramM, paramL, valueM, valueL) => {
+	0x1f: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x1f);
 		return {
 			modelName:   'GS/XG',
 			commandName: 'Drum Instrument Delay/Var. Send Level',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x24: (paramM, paramL, valueM, valueL) => {
+	0x24: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x24);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum HPF Cutoff Frequency',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x25: (paramM, paramL, valueM, valueL) => {
+	0x25: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x25);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum HPF Resonance (reserved)',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x30: (paramM, paramL, valueM, valueL) => {
+	0x30: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x30);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum EQ Bass Gain',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x31: (paramM, paramL, valueM, valueL) => {
+	0x31: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x31);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum EQ Treble Gain',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x32: (paramM, paramL, valueM, valueL) => {
+	0x32: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x32);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum EQ Mid-Bass Gain (reserved)',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x33: (paramM, paramL, valueM, valueL) => {
+	0x33: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x33);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum EQ Mid-Treble Gain (reserved)',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x34: (paramM, paramL, valueM, valueL) => {
+	0x34: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x34);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum EQ Bass Frequency',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x35: (paramM, paramL, valueM, valueL) => {
+	0x35: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x35);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum EQ Treble Frequency',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x36: (paramM, paramL, valueM, valueL) => {
+	0x36: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x36);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum EQ Mid-Bass Frequency (reserved)',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
 /*
-	0x37: (paramM, paramL, valueM, valueL) => {
+	0x37: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x37);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum Mid-Treble Frequency (reserved)',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
 */
-	0x40: (paramM, paramL, valueM, valueL) => {
+	0x40: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x40);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum Velocity Pitch Sens.',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
-	0x41: (paramM, paramL, valueM, valueL) => {
+	0x41: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x41);
 		return {
 			modelName:   'XG',
 			commandName: 'Drum Velocity LPF Cutoff Sens.',
-			noteNo:      paramL,
+			noteNo: paramL,
+			value:  valueM,
 		};
 	},
 
 	// Dream SAM
 	// Note: Some mid/high range of SAM chips have different NRPN assignments on 0x37xx and support another NRPNs whose MSBs are 0x02xx-0x0dxx.
 	// But, this NRPN parser only supports low-cost SAM chip models for example SAM2635, SAM2695, SAM2195, and so on.
-	0x37: (paramM, paramL, valueM, valueL) => {
+	0x37: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x37);
 		const mes = {
 			0x00: {
@@ -549,7 +573,7 @@ const parsersNrpn = {
 			},
 		}[paramL];
 
-		return (mes) ? {modelName: 'DreamSAM', ...mes} : null;
+		return (mes) ? {modelName: 'Dream SAM', value: valueM, ...mes} : null;
 	},
 
 	// Hyper Canvas / TTS-1
@@ -558,57 +582,75 @@ const parsersNrpn = {
 		let mes = {
 			0x01: {
 				commandName: 'Character',
+				value: valueM,
 			},
 			0x20: {
 				commandName: 'Tone Control Switch',
+				value: valueM,
 			},
 			0x22: {
 				commandName: 'Tone Control Bass Gain',
+				value: valueM,
 			},
 			0x24: {
 				commandName: 'Tone Control Treble Gain',
+				value: valueM,
 			},
 			0x27: {
 				commandName: 'Tone Control Mid Gain',
+				value: valueM,
 			},
 			0x40: {
 				commandName: 'Reverb Switch',
+				value: valueM,
 			},
 			0x41: {
 				commandName: 'Reverb Type',
+				value: valueM,
 			},
 			0x42: {
 				commandName: 'Reverb Time',
+				value: valueM,
 			},
 			0x50: {
 				commandName: 'Chorus Switch',
+				value: valueM,
 			},
 			0x51: {
 				commandName: 'Chorus Type',
+				value: valueM,
 			},
 			0x52: {
 				commandName: 'Chorus Rate',
+				value: valueM,
 			},
 			0x53: {
 				commandName: 'Chorus Depth',
+				value: valueM,
 			},
 			0x54: {
 				commandName: 'Chorus Feedback',
+				value: valueM,
 			},
 			0x55: {
 				commandName: 'Chorus Send to Reverb',
+				value: valueM,
 			},
 			0x70: {
 				commandName: 'Master Volume',
+				value: valueM,
 			},
 			0x71: {
 				commandName: 'Master Tuning',
+				value: ((valueM << 7) | valueL) - 0x2000,
 			},
 			0x72: {
 				commandName: 'Master Key Shift',
+				value: valueM,
 			},
 			0x7f: {
 				commandName: 'System Reset',
+				value: valueM,
 			},
 		}[paramL];
 
@@ -616,6 +658,7 @@ const parsersNrpn = {
 			if (0x30 <= paramL && paramL <= 0x3b) {
 				mes = {
 					commandName: `Scale Tune ${['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][paramL - 0x30]}`,
+					value: valueM,
 				};
 			}
 		}
@@ -629,36 +672,47 @@ const parsersNrpn = {
 		const mes = {
 			0x01: {
 				commandName: 'Enable Auto Pitch Control',
+				value: valueM,
 			},
 			0x02: {
 				commandName: 'Enable Auto Dynamics Control',
+				value: valueM,
 			},
 			0x03: {
 				commandName: 'Vibrato Type',
+				value: valueM,
 			},
 			0x04: {
 				commandName: 'Vibrato Rate',
+				value: valueM,
 			},
 			0x05: {
 				commandName: 'Reserved',
+				value: valueM,
 			},
 			0x06: {
 				commandName: 'Reserved',
+				value: valueM,
 			},
 			0x07: {
 				commandName: 'Vibrato Delay',
+				value: (valueM << 7) | valueL,
 			},
 			0x08: {
 				commandName: 'Portamento Timing',
+				value: valueM,
 			},
 			0x09: {
 				commandName: 'Seek',
+				value: valueM,
 			},
 			0x0a: {
 				commandName: 'White Noise Control',
+				value: valueM,
 			},
 			0x0c: {
 				commandName: 'Phoneme Unit Connect Type',
+				value: valueM,
 			},
 		}[paramL];
 
@@ -666,7 +720,7 @@ const parsersNrpn = {
 	},
 
 	// NSX-1 Phonetic Symbols
-	0x71: (paramM, paramL, valueM, valueL) => {
+	0x71: (paramM, paramL, valueM, _) => {
 		console.assert(paramM === 0x71);
 		const mes = {
 			0x12: {
@@ -680,7 +734,7 @@ const parsersNrpn = {
 			},
 		}[paramL];
 
-		return (mes) ? {modelName: 'NSX-1', ...mes} : null;
+		return (mes) ? {modelName: 'NSX-1', value: valueM, ...mes} : null;
 	},
 
 	// SoundFont v2
@@ -892,7 +946,7 @@ const parsersNrpn = {
 			}
 		}
 
-		return (mes) ? {modelName: 'SoundFont', ...mes} : null;
+		return (mes) ? {modelName: 'SoundFont', value: ((valueM << 7) | valueL) - 0x2000, ...mes} : null;
 	},
 
 	// EMU8000
@@ -903,7 +957,6 @@ const parsersNrpn = {
 
 function handleEmu8000Nrpn(paramM, paramL, valueM, valueL) {
 	console.assert(paramM === 0x7f || paramM === 0x7e || paramM === 0x7d);
-	// TODO: Implement calculation of actual value for each NRPN parameter.
 	const mes = {
 		0x00: {
 			commandName: 'Delay before LFO1 Starts',
@@ -988,7 +1041,7 @@ function handleEmu8000Nrpn(paramM, paramL, valueM, valueL) {
 		},
 	}[paramL];
 
-	return (mes) ? {modelName: 'EMU8000', ...mes} : null;
+	return (mes) ? {modelName: 'EMU8000', value: ((valueM << 7) | valueL) - 0x2000, ...mes} : null;
 }
 
 export const [analyzeRpn, analyzeNrpn] = ['rpn', 'nrpn'].map((kind) => {
