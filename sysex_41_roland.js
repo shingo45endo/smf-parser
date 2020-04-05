@@ -1,4 +1,4 @@
-import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError, convert7to8bits} from './sysex_instance.js';
+import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError, convert7to8bits} from './sysex_common.js';
 
 const modelProps = [
 	// MT-32, CM-32L, CM-32P, and CM-64 (including D-10/110, D-20, D-5, and GR-50)
@@ -1592,6 +1592,15 @@ const modelProps = [
 		deviceId: 0x10,
 		deviceIdRegexp: '[01][0-9a-f]',
 		commands: [0x11, 0x12],
+		addrLen: 4,
+	},
+	// E-80 (Music Workstation)
+	{
+		modelId: [0x00, 0x00, 0x08],
+		modelName: 'E-80',
+		deviceId: 0x10,
+		deviceIdRegexp: '[01][0-9a-f]',
+		commands: [0x12],
 		addrLen: 4,
 	},
 	// TD-12 (Percussion Sound Module)
