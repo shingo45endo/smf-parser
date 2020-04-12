@@ -6,7 +6,7 @@ const modelNames = {
 	0x0a: 'GMouse/GMCAT',
 };
 
-const parsersGMega = new Map([
+const parsersGMega = [
 	// A-1: System Functions
 	['f0 40 00 10 00 08 00', {
 		regexp: /^f0 40 0. 10 00 08 00 .. 00 0. 0. f7$/u,
@@ -286,9 +286,9 @@ const parsersGMega = new Map([
 			};
 		},
 	}],
-]);
+];
 
-const parsersGMegaLX = new Map([
+const parsersGMegaLX = [
 	// A-1: System Functions
 	['f0 40 00 10 00 09 00', {
 		regexp: /^f0 40 0. 10 00 09 00 .. 00 0. 0. f7$/u,
@@ -360,7 +360,7 @@ const parsersGMegaLX = new Map([
 			};
 		},
 	}],
-]);
+];
 // A-2: Performance Mode Section Functions (supported by only KC20)
 // A-3: Performance Mode Settings Functions (supported by only KC20)
 // A-4: Compose Mode Section Functions
@@ -388,7 +388,7 @@ for (let i = 0x01; i <= 0x04; i++) {
 	})(modelNames[0x09], commandName);
 
 	const key = `f0 40 00 10 00 09 ${commandStr}`;
-	parsersGMegaLX.set(key, {regexp, handler});
+	parsersGMegaLX.push([key, {regexp, handler}]);
 }
 // B-1: Dump System Functions
 // B-2: Dump Performance Mode Section Functions (supported by only KC20)
@@ -419,7 +419,7 @@ for (let i = 0x00; i <= 0x04; i++) {
 	})(modelNames[0x09], commandName);
 
 	const key = `f0 40 00 20 00 09 ${commandStr}`;
-	parsersGMegaLX.set(key, {regexp, handler});
+	parsersGMegaLX.push([key, {regexp, handler}]);
 }
 // D-1: System Functions Data Request
 // D-2: Performance Mode Data Request
@@ -445,10 +445,10 @@ for (let i = 0x00; i <= 0x02; i++) {
 	})(modelNames[0x09], commandName);
 
 	const key = `f0 40 00 00 00 09 ${commandStr}`;
-	parsersGMegaLX.set(key, {regexp, handler});
+	parsersGMegaLX.push([key, {regexp, handler}]);
 }
 
-const parsersGMouse = new Map([
+const parsersGMouse = [
 	// A-1: System Functions
 	['f0 40 00 10 00 0a 00', {
 		regexp: /^f0 40 0. 10 00 0a 00 .. 00 0. 0. f7$/u,
@@ -479,7 +479,7 @@ const parsersGMouse = new Map([
 			};
 		},
 	}],
-]);
+];
 
 function makeValueFromNibbles(l, h) {
 	return ((h & 0x0f) << 4) | (l & 0x0f);

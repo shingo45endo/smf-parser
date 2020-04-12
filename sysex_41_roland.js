@@ -2080,7 +2080,7 @@ function makeParsers(modelProp) {
 	const deviceIdStr = (modelProp.deviceIdRegexp) ? modelProp.deviceIdRegexp : ('deviceId' in modelProp) ? bytesToHex([modelProp.deviceId]) : '..';
 	const addrStr = [...new Array(modelProp.addrLen)].fill('..').join(' ');
 
-	const parsers = new Map();
+	const parsers = [];
 	for (const command of modelProp.commands) {
 		const commandStr = bytesToHex((Array.isArray(command)) ? command : [command]);
 
@@ -2200,11 +2200,11 @@ function makeParsers(modelProp) {
 		}
 
 		const key = `f0 41 ${bytesToHex([modelProp.deviceId || 0x00])} ${modelIdStr} ${commandStr}`;
-		parsers.set(key, {regexp, handler});
+		parsers.push([key, {regexp, handler}]);
 
 		if (modelProp.deviceId && (new RegExp(deviceIdStr, 'u')).test('00')) {
 			const key2 = `f0 41 00 ${modelIdStr} ${commandStr}`;
-			parsers.set(key2, {regexp, handler});
+			parsers.push([key2, {regexp, handler}]);
 		}
 	}
 

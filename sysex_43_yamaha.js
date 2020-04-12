@@ -95,7 +95,7 @@ const modelPropsParam = [
 	},
 ];
 
-const parsersBulkDump = new Map([
+const parsersBulkDump = [
 	// Bulk Dump
 	['f0 43 00 7a', {
 		regexp: /^f0 43 0. [07]a .. .. 4c 4d 20 20 .. .. .. .. .. .. 00 00 00 00 00 00 00 00 00 00 00 00 00 00 .. .. (?:.. )+f7$/u,
@@ -158,7 +158,7 @@ const parsersBulkDump = new Map([
 			}
 		},
 	}],
-]);
+];
 
 function makeParsersXG(modelProp) {
 	console.assert(modelProp);
@@ -170,7 +170,7 @@ function makeParsersXG(modelProp) {
 		0x30: 'Parameter Request',
 	};
 
-	const parsers = new Map();
+	const parsers = [];
 	for (const command of modelProp.commands) {
 		const str = `f0 43 ${bytesToHex([command])[0]}. ${bytesToHex([modelProp.modelId])}`;
 
@@ -220,7 +220,7 @@ function makeParsersXG(modelProp) {
 		}
 
 		const key = str.replace('.', '0');
-		parsers.set(key, {regexp, handler});
+		parsers.push([key, {regexp, handler}]);
 	}
 
 	return parsers;
@@ -234,7 +234,7 @@ function makeParsersGM(modelProp) {
 		0x30: 'Bulk Dump Request',
 	};
 
-	const parsers = new Map();
+	const parsers = [];
 	for (const command of modelProp.commands) {
 		const str = `f0 43 ${bytesToHex([command])[0]}. ${bytesToHex([modelProp.modelId])}`;
 
@@ -273,7 +273,7 @@ function makeParsersGM(modelProp) {
 		}
 
 		const key = str.replace('.', '0');
-		parsers.set(key, {regexp, handler});
+		parsers.push([key, {regexp, handler}]);
 	}
 
 	return parsers;
@@ -282,7 +282,7 @@ function makeParsersGM(modelProp) {
 function makeParsersParam(modelProp) {
 	console.assert(modelProp);
 
-	const parsers = new Map();
+	const parsers = [];
 	const str = `f0 43 1. ${bytesToHex([modelProp.modelId])}`;
 
 	const regexp = new RegExp(String.raw`^${str}(?: ..){${modelProp.paramLen}}(?: ..){2} f7$`, 'u');
@@ -299,7 +299,8 @@ function makeParsersParam(modelProp) {
 	})(modelProp.modelName, modelProp.paramLen);
 
 	const key = str.replace('.', '0');
-	parsers.set(key, {regexp, handler});
+	parsers.push([key, {regexp, handler}]);
+
 	return parsers;
 }
 

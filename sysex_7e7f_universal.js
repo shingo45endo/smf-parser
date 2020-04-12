@@ -1,6 +1,6 @@
 import {addSysExParsers, stripEnclosure, checkSumError, makeValueFrom7bits, convert7to8bits, splitArrayByN} from './sysex_common.js';
 
-const parsers = new Map([
+const parsers = [
 	// [7e-01] Sample Dump Header
 	['f0 7e 7f 01', {
 		regexp: /^f0 7e .. 01 .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. f7$/u,
@@ -999,7 +999,7 @@ const parsers = new Map([
 			};
 		},
 	}],
-]);
+];
 
 function handleTimeSignature(bytes) {
 	const [mfrId, deviceId, subId1, subId2, ln, nn, dd, cc, bb, ...payload] = stripEnclosure(bytes);

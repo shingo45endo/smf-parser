@@ -1,6 +1,6 @@
 import {addSysExParsers, stripEnclosure} from './sysex_common.js';
 
-const parsers = new Map([
+const parsers = [
 	// Request Bulk Dump
 	['f0 47 10 00 5d', {
 		regexp: /^f0 47 10 00 5d .. .. f7$/u,
@@ -45,6 +45,6 @@ const parsers = new Map([
 			};
 		},
 	}],
-]);
+];
 
 addSysExParsers(parsers);

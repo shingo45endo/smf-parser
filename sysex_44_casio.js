@@ -1,6 +1,6 @@
 import {addSysExParsers, stripEnclosure} from './sysex_common.js';
 
-const parsers = new Map([
+const parsers = [
 	['f0 44 0b 09', {
 		regexp: /^f0 44 0b 09 .. f7$/u,
 		handler: (bytes) => {
@@ -14,6 +14,6 @@ const parsers = new Map([
 			};
 		},
 	}],
-]);
+];
 
 addSysExParsers(parsers);

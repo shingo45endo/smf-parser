@@ -97,7 +97,7 @@ function makeParsers(modelProp) {
 
 	const modelIdStr = bytesToHex([modelProp.modelId]);
 
-	const parsers = new Map();
+	const parsers = [];
 	for (const command of modelProp.commands) {
 		const commandStr = bytesToHex([command]);
 
@@ -264,7 +264,7 @@ function makeParsers(modelProp) {
 		}
 
 		const key = `f0 18 ${modelIdStr} 00 ${commandStr}`;
-		parsers.set(key, {regexp, handler});
+		parsers.push([key, {regexp, handler}]);
 	}
 
 	return parsers;

@@ -2,10 +2,14 @@ const sysExKeyMap = new Map();
 let maxKeyLength = 0;
 
 export function addSysExParsers(parsers) {
-	console.assert(parsers instanceof Map, 'Invalid argument', {parsers});
+	console.assert(Array.isArray(parsers), 'Invalid argument', {parsers});
 
-	parsers.forEach((parser, key) => {
-		console.assert(/^(?:.. )+..$/u.test(key), 'Invalid key format', {key, value: parser});
+	for (const parser of parsers) {
+		console.assert(Array.isArray(parser), 'Invalid argument', {parser});
+
+		const [key, value] = parser;
+		console.assert(/^(?:.. )+..$/u.test(key), 'Invalid key format', {key, value});
+		console.assert(value && value.regexp && value.handler, 'Invalid parser', {key, value});
 
 		// Keeps the maximum length of all the keys.
 		const strs = key.split(' ');
@@ -21,9 +25,9 @@ export function addSysExParsers(parsers) {
 			}
 			const array = sysExKeyMap.get(key);
 			console.assert(Array.isArray(array));
-			array.push(parser);
+			array.push(value);
 		}
-	});
+	}
 }
 
 export function analyzeSysEx(bytes) {
