@@ -1,18 +1,19 @@
-const sysExParsers = new Map();
 const sysExKeyMap = new Map();
+let maxKeyLength = 0;
 
 export function addSysExParsers(parsers) {
 	console.assert(parsers instanceof Map, 'Invalid argument', {parsers});
 
 	parsers.forEach((parser, key) => {
 		console.assert(/^(?:.. )+..$/u.test(key), 'Invalid key format', {key, value: parser});
-		console.assert(!sysExParsers.has(key), 'Already exists', {key, value: parser});
 
-		// Adds a parser.
-		sysExParsers.set(key, parser);
+		// Keeps the maximum length of all the keys.
+		const strs = key.split(' ');
+		if (maxKeyLength < strs.length) {
+			maxKeyLength = strs.length;
+		}
 
 		// Registers parsers to the map with various length of keys.
-		const strs = key.split(' ');
 		for (let i = 0; i < strs.length; i++) {
 			const key = strs.slice(0, i + 1).join(' ');
 			if (!sysExKeyMap.has(key)) {
@@ -58,19 +59,22 @@ function findParser(bytes) {
 
 	// Gets the array of parsers for this SysEx bytes.
 	let parsers = null;
-	for (let i = 0; i < bytes.length; i++) {
-		const key = bytesToHex(bytes.slice(0, i + 1));
-		if (!sysExKeyMap.has(key)) {
+	for (let i = Math.min(bytes.length, maxKeyLength) - 1; i >= 2; i--) {	// "i >= 2" means that sysExKeyMap.get('f0') won't be a target.
+		const key = bytesToHex(bytes.slice(0, i));
+		if (sysExKeyMap.has(key)) {
+			parsers = sysExKeyMap.get(key);
 			break;
 		}
-		parsers = sysExKeyMap.get(key);
 	}
-	console.assert(Array.isArray(parsers));
+	if (!parsers) {
+		return null;
+	}
 
 	// Searches the SysEx parser which can handle this SysEx bytes.
 	const hexStr = bytesToHex(bytes);
 	for (const parser of parsers) {
 		if (parser.regexp && parser.regexp.test(hexStr)) {
+//			console.assert(parsers.filter((e) => e.regexp.test(hexStr)).length === 1, `There are two or more parsers which can handle "${hexStr}".`);
 			return parser;
 		}
 	}
