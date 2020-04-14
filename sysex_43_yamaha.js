@@ -1,7 +1,7 @@
 import {addSysExParsers, bytesToHex, stripEnclosure, checkSumError, makeValueFrom7bits} from './sysex_common.js';
 
 const modelPropsXG = [
-	// XG
+	// XG/MU
 	{
 		modelId: 0x4c,
 		modelName: 'XG',
@@ -18,6 +18,7 @@ const modelPropsXG = [
 		commands: [0x00, 0x10, 0x20, 0x30],
 	},
 
+	// XG Plugins
 	{
 		modelId: 0x55,
 		modelName: 'VL70-m/P50-m',
@@ -36,7 +37,7 @@ const modelPropsXG = [
 	{
 		modelId: 0x5d,
 		modelName: 'PLG-SG',
-		commands: [0x00, 0x10/* , 0x30 */],
+		commands: [0x00, 0x10, 0x30],
 	},
 	{
 		modelId: 0x62,
@@ -48,6 +49,117 @@ const modelPropsXG = [
 		modelName: 'PLG-PF/DR/PC/AP',
 		commands: [0x00, 0x10],
 	},
+
+	// XG-based Synthesizers
+	{
+		modelId: 0x4b,
+		modelName: 'QS300/B900/CS1x',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: 0x5f,
+		modelName: 'QY70/QY100',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: 0x60,
+		modelName: 'B2000',
+		commands: [0x00, 0x10],
+	},
+	{
+		modelId: 0x63,
+		modelName: 'CS2x',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: 0x6c,
+		modelName: 'BX/S03/S08',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+
+	// Non-XG, but same address-based architecture
+	{
+		modelId: 0x5b,
+		modelName: 'EX5/EX7',
+		commands: [0x00, 0x10, 0x20],
+	},
+	{
+		modelId: 0x5e,
+		modelName: 'FS1R',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: 0x64,
+		modelName: 'CS6x/S80/S30',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: 0x6b,
+		modelName: 'MOTIF/S90',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: 0x6f,
+		modelName: 'MOTIF-RACK',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+/*
+	{
+		modelId: [0x7f, 0x00],
+		modelName: 'MOTIF ES',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: [0x7f, 0x03],
+		modelName: 'MOTIF XS',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: [0x7f, 0x04],
+		modelName: 'CP300',
+		commands: [0x00, 0x20],
+	},
+	{
+		modelId: [0x7f, 0x05],
+		modelName: 'CP33',
+		commands: [0x00, 0x20],
+	},
+	{
+		modelId: [0x7f, 0x0c],
+		modelName: 'CP1',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: [0x7f, 0x0d],
+		modelName: 'S90 XS',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: [0x7f, 0x10],
+		modelName: 'CP5',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: [0x7f, 0x11],
+		modelName: 'CP50',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: [0x7f, 0x12],
+		modelName: 'MOTIF XF',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: [0x7f, 0x1a],
+		modelName: 'CP4 STAGE',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+	{
+		modelId: [0x7f, 0x1b],
+		modelName: 'CP40 STAGE',
+		commands: [0x00, 0x10, 0x20, 0x30],
+	},
+*/
 ];
 
 const modelPropsGM = [
@@ -75,11 +187,29 @@ const modelPropsParam = [
 		modelName: 'TG33',
 		paramLen: 7,
 	},
+	// B500, B700 (Switch Remote)
+	{
+		modelId: 0x28,
+		modelName: 'B500/B700',
+		paramLen: 4,
+	},
 	// SY85, TG500
 	{
 		modelId: 0x29,
 		modelName: 'SY85',
 		paramLen: 4,
+	},
+	// P-100, P-500, P-300, P-150, P-200
+	{
+		modelId: 0x2a,
+		modelName: 'P-100',
+		paramLen: 4,
+	},
+	// RM50, RY30
+	{
+		modelId: 0x30,
+		modelName: 'RM50',
+		paramLen: 5,
 	},
 	// SY77, TG77, SY99
 	{
@@ -93,71 +223,22 @@ const modelPropsParam = [
 		modelName: 'TG55',
 		paramLen: 4,
 	},
-];
-
-const parsersBulkDump = [
-	// Bulk Dump
-	['f0 43 00 7a', {
-		regexp: /^f0 43 0. [07]a .. .. 4c 4d 20 20 .. .. .. .. .. .. 00 00 00 00 00 00 00 00 00 00 00 00 00 00 .. .. (?:.. )+f7$/u,
-		handler: (bytes) => {
-			const [mfrId, deviceId, commandId, byteCountM, byteCountL, ...rest] = stripEnclosure(bytes);
-			console.assert(mfrId === 0x43 && (commandId & 0x0f) === 0x0a);
-
-			const byteCount = makeValueFrom7bits(byteCountL, byteCountM);
-			const formatName = String.fromCharCode(...rest.slice(0, 10));
-			const checkSum = rest.pop();
-			const isCheckSumError = checkSumError(bytes.slice(6, -1));
-
-			return {
-				commandName: 'Bulk Dump',
-				modelName:   'SY/TG',
-				mfrId, deviceId, commandId, byteCount, formatName, checkSum, isCheckSumError,
-				memoryType: bytes[30],
-				memoryNo:   bytes[31],
-				payload:    bytes.slice(32, -2),
-			};
-		},
-	}],
-	// Bulk Dump Request
-	['f0 43 20 7a', {
-		regexp: /^f0 43 [02]. [07]a 4c 4d 20 20 .. .. .. .. .. .. (?:(?:.. ){14})?f7$/u,
-		handler: (bytes) => {
-			console.assert(bytes.length === 14 || bytes.length === 30);
-			const [mfrId, deviceId, commandId, ...rest] = stripEnclosure(bytes);
-			console.assert(mfrId === 0x43 && (commandId & 0x0f) === 0x0a);
-			const formatName = String.fromCharCode(...rest.slice(0, 10));
-
-			const obj = {
-				commandName: 'Bulk Dump Request',
-				modelName:   'SY/TG',
-				mfrId, deviceId, commandId, formatName,
-			};
-
-			if (bytes.length === 14) {
-				return obj;
-
-			} else if (bytes.slice(14, 28).every((e) => (e === 0x00))) {
-				return {
-					...obj,
-					memoryType: bytes[28],
-					memoryNo:   bytes[29],
-				};
-
-			} else {
-				const [addrH, addrM, addrL, byteCountH, byteCountM, byteCountL] = rest;
-				const address = [addrH, addrM, addrL];
-				const byteCount = makeValueFrom7bits(byteCountL, byteCountM, byteCountH);
-				const checkSum = rest.pop();
-				const isCheckSumError = checkSumError(bytes.slice(6, -1));
-
-				return {
-					...obj,
-					modelName: 'TG100',
-					address, byteCount, checkSum, isCheckSumError,
-				};
-			}
-		},
-	}],
+/*
+	// A7000
+	{
+		modelId: 0x48,
+		modelName: 'A7000',
+		paramLen: 7,
+		isNibblizedData: true,
+	},
+	// A5000/A4000
+	{
+		modelId: 0x58,
+		modelName: 'A5000',
+		paramLen: 7,
+		isNibblizedData: true,
+	},
+*/
 ];
 
 function makeParsersXG(modelProp) {
@@ -303,6 +384,71 @@ function makeParsersParam(modelProp) {
 
 	return parsers;
 }
+
+const parsersBulkDump = [
+	// Bulk Dump
+	['f0 43 00 7a', {
+		regexp: /^f0 43 0. [07]a .. .. 4c 4d 20 20 .. .. .. .. .. .. 00 00 00 00 00 00 00 00 00 00 00 00 00 00 .. .. (?:.. )+f7$/u,
+		handler: (bytes) => {
+			const [mfrId, deviceId, commandId, byteCountM, byteCountL, ...rest] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x43 && (commandId & 0x0f) === 0x0a);
+
+			const byteCount = makeValueFrom7bits(byteCountL, byteCountM);
+			const formatName = String.fromCharCode(...rest.slice(0, 10));
+			const checkSum = rest.pop();
+			const isCheckSumError = checkSumError(bytes.slice(6, -1));
+
+			return {
+				commandName: 'Bulk Dump',
+				modelName:   'SY/TG',
+				mfrId, deviceId, commandId, byteCount, formatName, checkSum, isCheckSumError,
+				memoryType: bytes[30],
+				memoryNo:   bytes[31],
+				payload:    bytes.slice(32, -2),
+			};
+		},
+	}],
+	// Bulk Dump Request
+	['f0 43 20 7a', {
+		regexp: /^f0 43 [02]. [07]a 4c 4d 20 20 .. .. .. .. .. .. (?:(?:.. ){14})?f7$/u,
+		handler: (bytes) => {
+			console.assert(bytes.length === 14 || bytes.length === 30);
+			const [mfrId, deviceId, commandId, ...rest] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x43 && (commandId & 0x0f) === 0x0a);
+			const formatName = String.fromCharCode(...rest.slice(0, 10));
+
+			const obj = {
+				commandName: 'Bulk Dump Request',
+				modelName:   'SY/TG',
+				mfrId, deviceId, commandId, formatName,
+			};
+
+			if (bytes.length === 14) {
+				return obj;
+
+			} else if (bytes.slice(14, 28).every((e) => (e === 0x00))) {
+				return {
+					...obj,
+					memoryType: bytes[28],
+					memoryNo:   bytes[29],
+				};
+
+			} else {
+				const [addrH, addrM, addrL, byteCountH, byteCountM, byteCountL] = rest;
+				const address = [addrH, addrM, addrL];
+				const byteCount = makeValueFrom7bits(byteCountL, byteCountM, byteCountH);
+				const checkSum = rest.pop();
+				const isCheckSumError = checkSumError(bytes.slice(6, -1));
+
+				return {
+					...obj,
+					modelName: 'TG100',
+					address, byteCount, checkSum, isCheckSumError,
+				};
+			}
+		},
+	}],
+];
 
 // Add SysEx parsers.
 for (const modelProp of modelPropsXG) {
