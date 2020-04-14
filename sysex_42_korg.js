@@ -369,6 +369,13 @@ function makeParsers(modelProp) {
 		case 0x48:	// All Sequence Data Dump
 		case 0x44:	// Multi-Sound Parameter Dump
 			// TODO: Implement
+			regexp = new RegExp(String.raw`^f0 42 3. ${modelIdStr} ${commandStr} (?:.. )+f7$`, 'u');
+			handler = ((modelName, commandName) => (bytes) => {
+				const [mfrId, deviceId, modelId, commandId, ...payload] = stripEnclosure(bytes);
+				console.assert(mfrId === 0x42);
+
+				return {mfrId, deviceId, modelId, modelName, commandId, commandName, payload};	// TODO: Implement
+			})(modelProp.modelName, commandNames[command]);
 			break;
 
 		default:
