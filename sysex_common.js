@@ -90,7 +90,7 @@ function isValidSysEx(bytes) {
 	console.assert(bytes && bytes.length, 'Invalid argument', {bytes});
 
 	// Is the SysEx start with "f0" and end with "f7"?
-	if (!bytes || bytes.length < 6 || bytes[0] !== 0xf0 || bytes[bytes.length - 1] !== 0xf7) {
+	if (!bytes || bytes.length < 5 || bytes[0] !== 0xf0 || bytes[bytes.length - 1] !== 0xf7) {
 		return false;
 	}
 
