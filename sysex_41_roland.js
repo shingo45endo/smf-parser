@@ -2211,8 +2211,113 @@ function makeParsers(modelProp) {
 	return parsers;
 }
 
+const levelKind = {
+	0x20: 'Tone',
+	0x30: 'Patch',
+	0x40: 'Chord Memory',
+};
+
+const parsersMKS = [
+	['f0 41 30', {
+		regexp: /^f0 41 30 0. .. (?:.. ){18}f7$/u,
+		handler: (bytes) => {
+			const [mfrId, commandId, deviceId, toneNo, ...payload] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x41 && commandId === 0x30);
+			return {
+				commandName: 'Tone Change Mode',
+				modelName:   'MKS-7',
+				mfrId, deviceId, commandId, toneNo, payload,
+			};
+		},
+	}],
+	['f0 41 31', {
+		regexp: /^f0 41 31 0. .. (?:.. ){18}f7$/u,
+		handler: (bytes) => {
+			const [mfrId, commandId, deviceId, toneNo, ...payload] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x41 && commandId === 0x31);
+			return {
+				commandName: 'Tone Change Mode (Manual)',
+				modelName:   'JUNO-106',
+				mfrId, deviceId, commandId, toneNo, payload,
+			};
+		},
+	}],
+	['f0 41 32', {
+		regexp: /^f0 41 32 0. .. .. f7$/u,
+		handler: (bytes) => {
+			const [mfrId, commandId, deviceId, paramNo, value] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x41 && commandId === 0x32);
+			return {
+				commandName: 'Tone Parameter Change',
+				modelName:   'MKS-7',
+				mfrId, deviceId, commandId, paramNo, value,
+			};
+		},
+	}],
+	['f0 41 34', {
+		regexp: /^f0 41 34 0. .. .. .. .. .. .. f7$/u,
+		handler: (bytes) => {
+			const [mfrId, commandId, deviceId, formatType, levelNo, groupNo, extProgNo, progNo, _] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x41 && commandId === 0x34);
+			return {
+				commandName: 'Program Number',
+				modelName:   'MKS-70/MKS-80',
+				mfrId, deviceId, commandId, formatType, levelNo, groupNo, extProgNo, progNo,
+			};
+		},
+	}],
+	['f0 41 35', {
+		regexp: /^f0 41 35 0. .. .. .. (?:.. )+f7$/u,
+		handler: (bytes) => {
+			const [mfrId, commandId, deviceId, formatType, levelNo, groupNo, ...rest] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x41 && commandId === 0x35);
+
+			const obj = {
+				commandName: `All ${levelKind[levelNo] || 'Unknown'} Parameters`,
+				modelName:   'MKS',
+				mfrId, deviceId, commandId, formatType, levelNo, groupNo,
+			};
+
+			if (formatType === 0x23 && (levelNo === 0x20 || levelNo === 0x30)) {
+				obj.payload = rest.slice(0, 36);
+				obj.name = String.fromCharCode(...rest.slice(-10));
+				obj.commandName += ' with Name';
+			} else {
+				obj.payload = rest;
+			}
+
+			return obj;
+		},
+	}],
+	['f0 41 36', {
+		regexp: /^f0 41 36 0. .. .. .. .. .. f7$/u,
+		handler: (bytes) => {
+			const [mfrId, commandId, deviceId, formatType, levelNo, groupNo, paramNo, value] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x41 && commandId === 0x36);
+			return {
+				commandName: `Individual ${levelKind[levelNo] || 'Unknown'} Parameter`,
+				modelName:   'MKS',
+				mfrId, deviceId, commandId, formatType, levelNo, groupNo, paramNo, value,
+			};
+		},
+	}],
+	['f0 41 37', {
+		regexp: /^f0 41 37 0. .. .. .. .. .. (?:.. )+f7$/u,
+		handler: (bytes) => {
+			const [mfrId, commandId, deviceId, formatType, levelNo, groupNo, extProgNo, progNo, ...payload] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x41 && commandId === 0x37);
+			return {
+				commandName: `${levelKind[levelNo] || 'Unknown'} Bulk Dump`,
+				modelName:   'MKS',
+				mfrId, deviceId, commandId, formatType, levelNo, groupNo, extProgNo, progNo, payload,
+			};
+		},
+	}],
+];
+
 // Add SysEx parsers.
 for (const modelProp of modelProps) {
 	const parsers = makeParsers(modelProp);
 	addSysExParsers(parsers);
 }
+addSysExParsers(parsersMKS);
