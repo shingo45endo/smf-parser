@@ -385,8 +385,371 @@ function makeParsersParam(modelProp) {
 	return parsers;
 }
 
+const parsersFMParam = [
+	['f0 43 10 00', {
+		regexp: /^f0 43 1. 00 .. .. f7$/u,
+		handler: makeHandlerForFMParam('DX7', 'Parameter Change (VCED)'),
+	}],
+	['f0 43 10 01', {
+		regexp: /^f0 43 1. 01 .. .. f7$/u,
+		handler: makeHandlerForFMParam('DX7', 'Parameter Change (VCED)'),
+	}],
+	['f0 43 10 08', {
+		regexp: /^f0 43 1. 08 [4-7]. .. f7$/u,
+		handler: makeHandlerForFMParam('DX7', 'Parameter Change (DX7 Function)'),
+	}],
+	['f0 43 10 04', {
+		regexp: /^f0 43 1. 04 .. .. f7$/u,
+		handler: makeHandlerForFMParam('DX1', 'Parameter Change (Performance)'),
+	}],
+	['f0 43 10 09', {
+		regexp: /^f0 43 1. 09 [4-7]. .. f7$/u,
+		handler: makeHandlerForFMParam('DX9', 'Parameter Change (DX9 Function)'),
+	}],
+	['f0 43 10 11', {
+		regexp: /^f0 43 1. 11 .. .. f7$/u,
+		handler: makeHandlerForFMParam('TX', 'Parameter Change (TX Function)'),
+	}],
+	['f0 43 10 12', {
+		regexp: /^f0 43 1. 12 .. .. f7$/u,
+		handler: makeHandlerForFMParam('DX21', 'Parameter Change (4-op VCED)'),
+	}],
+	['f0 43 10 08', {
+		regexp: /^f0 43 1. 08 [0-3]. .. f7$/u,
+		handler: makeHandlerForFMParam('DX21', 'Parameter Change (Switch Remote)'),
+	}],
+	['f0 43 10 18', {
+		regexp: /^f0 43 1. 18 .. .. f7$/u,
+		handler: makeHandlerForFMParam('DX7II/TX802', 'Parameter Change (ACED)'),
+	}],
+	['f0 43 10 19', {
+		regexp: /^f0 43 1. 19 [0-3]. .. f7$/u,
+		handler: makeHandlerForFMParam('DX7II', 'Parameter Change (PCED/PMEM)'),
+	}],
+	['f0 43 10 19', {
+		regexp: /^f0 43 1. 19 [4-7]. .. f7$/u,
+		handler: makeHandlerForFMParam('DX7II/TX802', 'Parameter Change (System Setup)'),
+	}],
+	['f0 43 10 1a', {	// TODO: Support 2-byte parameters
+		regexp: /^f0 43 1. 1a .. .. f7$/u,
+		handler: makeHandlerForFMParam('TX802', 'Parameter Change (PCED)'),
+	}],
+	['f0 43 10 1b', {
+		regexp: /^f0 43 1. 1b .. .. f7$/u,
+		handler: makeHandlerForFMParam('DX7II/TX802', 'Parameter Change (Switch Remote)'),
+	}],
+	['f0 43 10 18 7e', {
+		regexp: /^f0 43 1. 18 7e .. .. .. f7$/u,
+		handler: makeHandlerForFMMicroTuning('DX7II/TX802', 'Parameter Change (Micro Tuning)', 0x7e),
+	}],
+	['f0 43 10 18 7f', {
+		regexp: /^f0 43 1. 18 7f .. .. .. .. f7$/u,
+		handler: (bytes) => {
+			console.assert(bytes && bytes.length === 10);
+			const [mfrId, deviceId, gh, pp, operatorNo, keyGroupNo, hh, ll] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x43 && gh === 0x18 && pp === 0x7f);
+			return {
+				commandName: 'Parameter Change (Fractional Scaling)',
+				modelName:   'DX7II/TX802',
+				mfrId, deviceId, operatorNo, keyGroupNo,
+				value: makeValueFrom7bits(ll, hh),
+			};
+		},
+	}],
+	['f0 43 10 13', {
+		regexp: /^f0 43 1. 13 (?!7f).. .. f7$/u,
+		handler: makeHandlerForFMParam('TX81Z/V2/V50', 'Parameter Change (4-op ACED1-3)'),
+	}],
+	['f0 43 10 13 7f', {
+		regexp: /^f0 43 1. 13 7f .. f7$/u,
+		handler: makeHandlerForFMParam('TX81Z/V2/V50', 'Parameter Change (Switch Remote)'),
+	}],
+	['f0 43 10 10', {
+		regexp: /^f0 43 1. 10 .. .. f7$/u,
+		handler: makeHandlerForFMParam('TX81Z/V2/V50', 'Parameter Change (4-op PCED)'),
+	}],
+	['f0 43 10 10 6e', {
+		regexp: /^f0 43 1. 10 6e .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('V50', 'Parameter Change (4-op PCED2)', 0x6e),
+	}],
+	['f0 43 10 10 7b', {
+		regexp: /^f0 43 1. 10 7b .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('TX81Z/V2/V50', 'Parameter Change (SYS/SYS2/SYS3)', 0x7b),
+	}],
+	['f0 43 10 10 7c', {
+		regexp: /^f0 43 1. 10 7c .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('TX81Z/V2/V50', 'Parameter Change (EFG1)', 0x7c),
+	}],
+	['f0 43 10 10 78', {
+		regexp: /^f0 43 1. 10 78 .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('V2/V50', 'Parameter Change (EFG2)', 0x78),
+	}],
+	['f0 43 10 10 79', {
+		regexp: /^f0 43 1. 10 79 .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('V2/V50', 'Parameter Change (EFG3)', 0x79),
+	}],
+	['f0 43 10 10 7a', {
+		regexp: /^f0 43 1. 10 7a .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('V2/V50', 'Parameter Change (EFG4)', 0x7a),
+	}],
+	['f0 43 10 10 7d', {
+		regexp: /^f0 43 1. 10 7d .. .. .. f7$/u,
+		handler: makeHandlerForFMMicroTuning('TX81Z/V2/V50', 'Parameter Change (Micro Tuning / Oct)', 0x7d),
+	}],
+	['f0 43 10 10 7e', {
+		regexp: /^f0 43 1. 10 7e .. .. .. f7$/u,
+		handler: makeHandlerForFMMicroTuning('TX81Z/V2/V50', 'Parameter Change (Micro Tuning / Full)', 0x7e),
+	}],
+	['f0 43 10 10 7f', {
+		regexp: /^f0 43 1. 10 7f .. .. .. f7$/u,
+		handler: (bytes) => {
+			console.assert(bytes && bytes.length === 9);
+			const [mfrId, deviceId, gh, pp, programNo, hh, ll] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x43 && gh === 0x10 && pp === 0x7f);
+			return {
+				commandName: 'Parameter Change (Program Change Table)',
+				modelName:   'TX81Z/V2/V50',
+				mfrId, deviceId, programNo,
+				value: makeValueFrom7bits(ll, hh),
+			};
+		},
+	}],
+	['f0 43 10 10 6f', {
+		regexp: /^f0 43 1. 10 6f .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('V50', 'Parameter Change (SYSQ)', 0x6f),
+	}],
+	['f0 43 10 10 70', {
+		regexp: /^f0 43 1. 10 70 .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('V50', 'Parameter Change (SYSR)', 0x70),
+	}],
+	['f0 43 10 10 71', {
+		regexp: /^f0 43 1. 10 71 .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('V50', 'Parameter Change (RINST1)', 0x71),
+	}],
+	['f0 43 10 10 72', {
+		regexp: /^f0 43 1. 10 72 .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('V50', 'Parameter Change (RINST2)', 0x72),
+	}],
+	['f0 43 10 10 73', {
+		regexp: /^f0 43 1. 10 73 .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('V50', 'Parameter Change (RKAT1)', 0x73),
+	}],
+	['f0 43 10 10 74', {
+		regexp: /^f0 43 1. 10 74 .. .. f7$/u,
+		handler: makeHandlerForFMParamEx('V50', 'Parameter Change (RKAT2)', 0x74),
+	}],
+	['f0 43 10 15', {
+		regexp: /^f0 43 1. 15 [0-3]. .. f7$/u,
+		handler: makeHandlerForFMParam('FB-01', 'Parameter Change (1-byte)'),
+	}],
+	['f0 43 10 15', {
+		regexp: /^f0 43 1. 15 [4-7]. .. .. f7$/u,
+		handler: (bytes) => {
+			console.assert(bytes && bytes.length === 8);
+			const [mfrId, deviceId, gh, paramNo, ll, hh] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x43 && gh === 0x15);
+			return {
+				commandName: 'Parameter Change (2-byte)',
+				modelName:   'FB-01',
+				mfrId, deviceId, paramNo,
+				value: ((hh & 0x0f) << 4) | (ll & 0x0f),
+			};
+		},
+	}],
+	['f0 43 10 20', {
+		regexp: /^f0 43 1. 20 .. .. f7$/u,
+		handler: makeHandlerForFMParam('TX16W', 'Parameter Change (System Setup)'),
+	}],
+	['f0 43 10 21', {
+		regexp: /^f0 43 1. 21 .. .. f7$/u,
+		handler: makeHandlerForFMParam('TX16W', 'Parameter Change (Performance)'),
+	}],
+	['f0 43 10 22', {
+		regexp: /^f0 43 1. 22 .. .. f7$/u,
+		handler: makeHandlerForFMParam('TX16W', 'Parameter Change (Voice)'),
+	}],
+	['f0 43 10 23', {
+		regexp: /^f0 43 1. 23 .. .. f7$/u,
+		handler: makeHandlerForFMParam('TX16W', 'Parameter Change (Filter)'),
+	}],
+	['f0 43 10 24', {
+		regexp: /^f0 43 1. 24 .. .. f7$/u,
+		handler: makeHandlerForFMParam('YS200', 'Parameter Change (System Setup / Switch Remote)'),
+	}],
+	['f0 43 10 25', {
+		regexp: /^f0 43 1. 25 .. .. f7$/u,
+		handler: makeHandlerForFMParam('DS55', 'Parameter Change (System Setup / Delay)'),
+	}],
+];
+
+function makeHandlerForFMParam(modelName, commandName) {
+	return ((modelName, commandName) => (bytes) => {
+		console.assert(bytes && bytes.length === 7);
+		const [mfrId, deviceId, gh, pp, dd] = stripEnclosure(bytes);
+		console.assert(mfrId === 0x43);
+		return {
+			commandName, modelName, mfrId, deviceId,
+			paramNo: makeValueFrom7bits(gh, pp) & 0xff,
+			value:   dd,
+		};
+	})(modelName, commandName);
+}
+
+function makeHandlerForFMParamEx(modelName, commandName, fixedParamNo) {
+	return ((modelName, commandName) => (bytes) => {
+		console.assert(bytes && bytes.length === 8);
+		const [mfrId, deviceId, gh, pp, kk, dd] = stripEnclosure(bytes);
+		console.assert(mfrId === 0x43 && gh < 0x26 && pp === fixedParamNo);
+		return {
+			commandName, modelName, mfrId, deviceId, fixedParamNo,
+			paramNo: kk,
+			value:   dd,
+		};
+	})(modelName, commandName, fixedParamNo);
+}
+
+function makeHandlerForFMMicroTuning(modelName, commandName, fixedParamNo) {
+	return ((modelName, commandName) => (bytes) => {
+		console.assert(bytes && bytes.length === 9);
+		const [mfrId, deviceId, gh, pp, noteNo, hh, ll] = stripEnclosure(bytes);
+		console.assert(mfrId === 0x43 && gh < 0x26 && pp === fixedParamNo);
+		return {
+			commandName, modelName, mfrId, deviceId, fixedParamNo, noteNo,
+			value: makeValueFrom7bits(hh, ll),
+		};
+	})(modelName, commandName, fixedParamNo);
+}
+
 const parsersBulkDump = [
-	// Bulk Dump
+	// Bulk Dump (FM)
+	['f0 43 00 00', {
+		regexp: /^f0 43 0. 00 .. .. (?:.. )+f7$/u,
+		handler: makeHandlerForFMDump('DX7', 'Bulk Dump (VCED)'),
+	}],
+	['f0 43 00 01', {
+		regexp: /^f0 43 0. 01 .. .. (?:.. )+f7$/u,
+		handler: makeHandlerForFMDump('DX7', 'Bulk Dump (PCED)'),
+	}],
+	['f0 43 00 02', {
+		regexp: /^f0 43 0. 02 .. .. (?:.. )+f7$/u,
+		handler: makeHandlerForFMDump('DX1', 'Bulk Dump (PMEM)'),
+	}],
+	['f0 43 00 03', {
+		regexp: /^f0 43 0. 03 .. .. (?:.. )+f7$/u,
+		handler: makeHandlerForFMDump('DX21', 'Bulk Dump (4-op VCED)'),
+	}],
+	['f0 43 00 04', {
+		regexp: /^f0 43 0. 04 .. .. (?:.. )+f7$/u,
+		handler: makeHandlerForFMDump('DX21', 'Bulk Dump (4-op VMEM)'),
+	}],
+	['f0 43 00 05', {
+		regexp: /^f0 43 0. 05 .. .. (?:.. )+f7$/u,
+		handler: makeHandlerForFMDump('DX7', 'Bulk Dump (ACED)'),
+	}],
+	['f0 43 00 06', {
+		regexp: /^f0 43 0. 06 .. .. (?:.. )+f7$/u,
+		handler: makeHandlerForFMDump('DX7', 'Bulk Dump (AMEM)'),
+	}],
+	['f0 43 00 09', {
+		regexp: /^f0 43 0. 09 .. .. (?:.. )+f7$/u,
+		handler: makeHandlerForFMDump('DX7', 'Bulk Dump (VMEM)'),
+	}],
+
+	// Bulk Dump Request (FM)
+	['f0 43 20 00 f7', {
+		regexp: /^f0 43 2. 00 f7$/u,
+		handler: makeHandlerForFMDumpRequest('DX1', 'Bulk Dump Request (VCED)'),
+	}],
+	['f0 43 20 01 f7', {
+		regexp: /^f0 43 2. 01 f7$/u,
+		handler: makeHandlerForFMDumpRequest('DX1', 'Bulk Dump Request (PCED)'),
+	}],
+	['f0 43 20 02 f7', {
+		regexp: /^f0 43 2. 02 f7$/u,
+		handler: makeHandlerForFMDumpRequest('DX1', 'Bulk Dump Request (PMEM)'),
+	}],
+	['f0 43 20 03 f7', {
+		regexp: /^f0 43 2. 03 f7$/u,
+		handler: makeHandlerForFMDumpRequest('DX21', 'Bulk Dump Request (4-op VCED)'),
+	}],
+	['f0 43 20 04 f7', {
+		regexp: /^f0 43 2. 04 f7$/u,
+		handler: makeHandlerForFMDumpRequest('DX21', 'Bulk Dump Request (4-op VMEM)'),
+	}],
+	['f0 43 20 05 f7', {
+		regexp: /^f0 43 2. 05 f7$/u,
+		handler: makeHandlerForFMDumpRequest('DX7II', 'Bulk Dump Request (ACED)'),
+	}],
+	['f0 43 20 06 f7', {
+		regexp: /^f0 43 2. 06 f7$/u,
+		handler: makeHandlerForFMDumpRequest('DX7II', 'Bulk Dump Request (AMEM)'),
+	}],
+	['f0 43 20 09 f7', {
+		regexp: /^f0 43 2. 09 f7$/u,
+		handler: makeHandlerForFMDumpRequest('DX1', 'Bulk Dump Request (VMEM)'),
+	}],
+
+	// Bulk Dump (FM Universal)
+	['f0 43 00 7e', {
+		regexp: /^f0 43 0. 7e (?:.. .. 4c 4d 20 20 .. .. .. .. .. .. (?:.. )+)+f7$/u,
+		handler: (bytes) => {
+			const [mfrId, deviceId, commandId, ...rest] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x43 && commandId === 0x7e);
+
+			const packets = [];
+			let index = 0;
+			while (index < rest.length - 2 - 10) {
+				const byteCount = makeValueFrom7bits(rest[index + 1], rest[index]);
+
+				const begin = index;
+				const end   = index + 2 + byteCount + 1;
+
+				const formatName = String.fromCharCode(...rest.slice(begin + 2, begin + 2 + 10));
+				const payload = rest.slice(begin + 2 + 10, end - 1);
+				const checkSum = rest[end - 1];
+				const isCheckSumError = checkSumError(rest.slice(begin + 2, end - 0));
+
+				packets.push({formatName, payload, checkSum, isCheckSumError});
+				index = end;
+			}
+
+			if (index !== rest.length || packets.length === 0) {
+				return null;
+			}
+
+			const obj = {
+				commandName: 'Bulk Dump (Universal)',
+				modelName:   'DX/TX',
+				mfrId, deviceId, commandId,
+			};
+
+			console.assert(packets.length > 0);
+			if (packets.length === 1) {
+				return {...obj, ...packets[0]};
+			} else {
+				return {...obj, packets};
+			}
+		},
+	}],
+
+	// Bulk Dump Request (FM Universal)
+	['f0 43 20 7e', {
+		regexp: /^f0 43 2. 7e .. .. .. .. .. .. .. .. .. .. f7$/u,
+		handler: (bytes) => {
+			console.assert(bytes && bytes.length === 15);
+			const [mfrId, deviceId, commandId, ...rest] = stripEnclosure(bytes);
+			console.assert(mfrId === 0x43 && commandId === 0x7e);
+
+			return {
+				commandName: 'Bulk Dump Request (Universal)',
+				modelName:   'DX/TX',
+				mfrId, deviceId, commandId,
+				formatName: String.fromCharCode(...rest),
+			};
+		},
+	}],
+
+	// Bulk Dump (SY/TG)
 	['f0 43 00 7a', {
 		regexp: /^f0 43 0. [07]a .. .. 4c 4d 20 20 .. .. .. .. .. .. 00 00 00 00 00 00 00 00 00 00 00 00 00 00 .. .. (?:.. )+f7$/u,
 		handler: (bytes) => {
@@ -408,11 +771,12 @@ const parsersBulkDump = [
 			};
 		},
 	}],
-	// Bulk Dump Request
+
+	// Bulk Dump Request (SY/TG)
 	['f0 43 20 7a', {
 		regexp: /^f0 43 [02]. [07]a 4c 4d 20 20 .. .. .. .. .. .. (?:(?:.. ){14})?f7$/u,
 		handler: (bytes) => {
-			console.assert(bytes.length === 14 || bytes.length === 30);
+			console.assert(bytes && (bytes.length === 14 || bytes.length === 30));
 			const [mfrId, deviceId, commandId, ...rest] = stripEnclosure(bytes);
 			console.assert(mfrId === 0x43 && (commandId & 0x0f) === 0x0a);
 			const formatName = String.fromCharCode(...rest.slice(0, 10));
@@ -450,6 +814,31 @@ const parsersBulkDump = [
 	}],
 ];
 
+function makeHandlerForFMDump(modelName, commandName) {
+	return ((modelName, commandName) => (bytes) => {
+		const [mfrId, deviceId, formatId, byteCountM, byteCountL, ...rest] = stripEnclosure(bytes);
+		console.assert(mfrId === 0x43);
+
+		const byteCount = makeValueFrom7bits(byteCountL, byteCountM);
+		const checkSum = rest.pop();
+		const isCheckSumError = checkSumError(bytes.slice(6, -1));
+
+		return {
+			commandName, modelName, mfrId, deviceId, formatId, byteCount, checkSum, isCheckSumError,
+		};
+	})(modelName, commandName);
+}
+
+function makeHandlerForFMDumpRequest(modelName, commandName) {
+	return ((modelName, commandName) => (bytes) => {
+		console.assert(bytes && bytes.length === 5);
+		const [mfrId, deviceId, formatId] = stripEnclosure(bytes);
+		return {
+			commandName, modelName, mfrId, deviceId, formatId,
+		};
+	})(modelName, commandName);
+}
+
 // Add SysEx parsers.
 for (const modelProp of modelPropsXG) {
 	const parsers = makeParsersXG(modelProp);
@@ -463,4 +852,5 @@ for (const modelProp of modelPropsParam) {
 	const parsers = makeParsersParam(modelProp);
 	addSysExParsers(parsers);
 }
+addSysExParsers(parsersFMParam);
 addSysExParsers(parsersBulkDump);
